@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Killer Detailing LLC — mobile automotive detailing. Where Dirt Meets Its Demise.">
+  <title>Killer Detailing LLC | Mobile Auto Detailing</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="#top">KILLER <span>DETAILING</span></a>
+      <nav>
+        <a href="#services">Services</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#about">About</a>
+        <a class="nav-cta" href="#book">Book Now</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-overlay"></div>
+      <div class="wrap hero-content">
+        <p class="eyebrow">MOBILE AUTO DETAILING</p>
+        <h1>WHERE DIRT<br><span>MEETS ITS DEMISE.</span></h1>
+        <p class="hero-copy">Professional mobile detailing brought straight to you.</p>
+        <div class="hero-buttons">
+          <a class="button button-red" href="#book">BOOK NOW</a>
+          <a class="button button-outline" href="#services">VIEW SERVICES</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="section">
+      <div class="wrap">
+        <p class="eyebrow">WHAT WE DO</p>
+        <h2>DETAILING SERVICES</h2>
+        <div class="cards">
+          <article class="card">
+            <div class="card-icon">01</div>
+            <h3>Exterior Detail</h3>
+            <p>Thorough exterior cleaning and finishing. Final package and pricing will be added here.</p>
+            <a href="#book">Book this service →</a>
+          </article>
+          <article class="card">
+            <div class="card-icon">02</div>
+            <h3>Interior Detail</h3>
+            <p>Deep interior cleaning for the areas that need the most attention. Final package and pricing will be added here.</p>
+            <a href="#book">Book this service →</a>
+          </article>
+          <article class="card">
+            <div class="card-icon">03</div>
+            <h3>Full Detail</h3>
+            <p>Interior and exterior service in one appointment. Final package and pricing will be added here.</p>
+            <a href="#book">Book this service →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="section section-dark">
+      <div class="wrap">
+        <p class="eyebrow">SIMPLE PRICING</p>
+        <h2>PACKAGES & ADD-ONS</h2>
+        <p class="section-lead">We’ll replace these placeholders with your exact services, vehicle sizes, prices and add-ons.</p>
+        <div class="price-grid">
+          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
+          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
+          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="wrap split">
+        <div>
+          <p class="eyebrow">ABOUT KILLER DETAILING</p>
+          <h2>WE BRING THE DETAIL SHOP TO YOU.</h2>
+          <p>Mobile detailing built around convenience, attention to detail and a damn good-looking finish.</p>
+          <p>Our service area, hours and business story will be added here.</p>
+        </div>
+        <div class="feature-panel">
+          <div class="feature-mark">KD</div>
+          <p>Mobile.<br>Professional.<br>Convenient.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="book" class="section booking">
+      <div class="wrap booking-wrap">
+        <div>
+          <p class="eyebrow">READY WHEN YOU ARE</p>
+          <h2>BOOK YOUR DETAIL</h2>
+          <p class="section-lead">The booking system will let customers select a service, request an available appointment, and pay their deposit through Stripe.</p>
+        </div>
+        <form id="booking-form" class="booking-form">
+          <label>Service
+            <select id="service" required>
+              <option value="">Choose a service</option>
+              <option>Exterior Detail</option>
+              <option>Interior Detail</option>
+              <option>Full Detail</option>
+            </select>
+          </label>
+          <label>Preferred date
+            <input id="date" type="date" required>
+          </label>
+          <label>Preferred time
+            <select id="time" required>
+              <option value="">Choose a time</option>
+              <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option>
+              <option>11:00 AM</option><option>12:00 PM</option><option>1:00 PM</option>
+              <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
+            </select>
+          </label>
+          <label>Your name
+            <input id="name" type="text" autocomplete="name" required>
+          </label>
+          <label>Phone
+            <input id="phone" type="tel" autocomplete="tel" required>
+          </label>
+          <label>Email
+            <input id="email" type="email" autocomplete="email" required>
+          </label>
+          <label>Vehicle
+            <input id="vehicle" type="text" placeholder="Year / Make / Model" required>
+          </label>
+          <label>Notes
+            <textarea id="notes" rows="4" placeholder="Anything we should know?"></textarea>
+          </label>
+          <button class="button button-red full" type="submit">REQUEST APPOINTMENT</button>
+          <p class="form-note">Payment will be handled securely through Stripe once the booking system is connected.</p>
+          <p id="form-message" class="form-message" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <div><strong>KILLER DETAILING LLC</strong><br><span>Where Dirt Meets Its Demise.</span></div>
+      <div><a href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a><br><span>Serving YOUR SERVICE AREA</span></div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
