@@ -71,7 +71,7 @@ export function validPhotoType(type) {
 }
 
 export function serviceNames() {
-  return ["Burial", "Embalming", "Viewing", "Resurrection", "Preneed (Prior Arrangements)", "Purple Heart Veteran"];
+  return ["Exterior Detail", "Interior Detail", "Full Detail"];
 }
 
 export function addonNames() {
