@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#080808">
+  <title>Your Estimate | Killer Detailing LLC</title>
+  <link rel="stylesheet" href="style.css">
+  <style>.estimate-page{max-width:720px;margin:9vh auto;padding:28px}.estimate-box{padding:26px;border:1px solid #333;background:#111}.estimate-total{font-size:2.2rem;font-weight:900;color:#fff}.estimate-message{min-height:1.5em;color:#ffc4c7}.estimate-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.estimate-summary{color:#bbb}.deposit-panel{margin-top:25px;padding:18px;border-left:3px solid var(--red);background:#090909}.estimate-page h1{font-size:clamp(2.2rem,8vw,3.5rem)}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap nav"><a class="brand" href="/">KILLER <span>DETAILING</span></a><nav aria-label="Main navigation"><a href="/">Home</a></nav></div></header>
+  <main class="estimate-page"><p class="eyebrow">PRIVATE ESTIMATE</p><section id="estimate-box" class="estimate-box"><h1>Your estimate</h1><p id="estimate-message" class="estimate-message" role="status" aria-live="polite">Loading your estimate…</p><div id="estimate-details" hidden><p id="customer-line"></p><p id="vehicle-line" class="estimate-summary"></p><p id="services-line" class="estimate-summary"></p><p id="addons-line" class="estimate-summary"></p><p id="note-line" class="estimate-summary"></p><p id="total-line" class="estimate-total"></p><div id="deposit-panel" class="deposit-panel" hidden><strong id="deposit-line"></strong><p>A 25% deposit is due after you accept this estimate. Your booking is confirmed only after Stripe verifies payment.</p></div><div class="estimate-actions"><button id="accept-estimate" class="button button-red" type="button" hidden>ACCEPT ESTIMATE</button><button id="pay-deposit" class="button button-red" type="button" hidden>PAY DEPOSIT SECURELY</button></div></div></section><p><a href="/">Return to Killer Detailing</a></p></main>
+  <script src="estimate.js"></script>
+</body>
+</html>

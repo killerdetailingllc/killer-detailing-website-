@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#080808">
+  <title>Owner Estimate Desk | Killer Detailing LLC</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-wrap{max-width:1050px;margin:0 auto;padding:55px 20px}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}.admin-panel,.request-card{background:#111;border:1px solid #333;padding:22px;margin:18px 0}.request-card h2{font-size:1.4rem}.request-meta{color:#bbb}.request-photos{display:flex;gap:10px;flex-wrap:wrap}.request-photos img{width:150px;height:110px;object-fit:cover;border:1px solid #444}.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.admin-form textarea{grid-column:1/-1}.admin-form button{grid-column:1/-1}.admin-status{color:#f3c5c7;min-height:1.5em}.request-card details{margin-top:14px}.logout{background:transparent;border:1px solid #666;color:#fff;padding:10px 14px;cursor:pointer}.estimate-link{overflow-wrap:anywhere;color:#ff777d}.login-box{max-width:480px;margin:10vh auto}.login-box label{display:grid;gap:8px}.request-card pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#ddd;font:inherit}.admin-hint{color:#999;font-size:.85rem}@media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form textarea,.admin-form button{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap nav"><a class="brand" href="/">KILLER <span>DETAILING</span></a><nav aria-label="Owner navigation"><a href="/">Public site</a></nav></div></header>
+  <main class="admin-wrap">
+    <section id="login-panel" class="admin-panel login-box">
+      <p class="eyebrow">OWNER ACCESS</p><h1 style="font-size:2.4rem">ESTIMATE DESK</h1>
+      <form id="login-form"><label for="owner-password">Owner password</label><input id="owner-password" type="password" autocomplete="current-password" required><button class="button button-red" type="submit">SIGN IN</button><p id="login-message" class="admin-status" role="status"></p></form>
+    </section>
+    <section id="desk" hidden>
+      <div class="admin-head"><div><p class="eyebrow">PRIVATE OWNER AREA</p><h1 style="font-size:2.4rem;margin:0">ESTIMATE DESK</h1></div><button id="logout" class="logout" type="button">Sign out</button></div>
+      <p class="admin-hint">Set your estimate and copy the private customer link. Send that link to the customer from your business email. The booking becomes confirmed only after Stripe verifies the deposit payment.</p>
+      <p id="desk-message" class="admin-status" role="status"></p>
+      <div id="requests"></div>
+    </section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>

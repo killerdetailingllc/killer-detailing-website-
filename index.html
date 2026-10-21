@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Killer Detailing LLC — mobile automotive detailing. Where Dirt Meets Its Demise.">
-  <title>Killer Detailing LLC | Mobile Auto Detailing</title>
+  <meta name="theme-color" content="#080808">
+  <meta name="description" content="Request a personalized estimate from Killer Detailing LLC. Send service details and vehicle photos for review.">
+  <title>Request an Estimate | Killer Detailing LLC</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="site-header">
     <div class="wrap nav">
       <a class="brand" href="#top">KILLER <span>DETAILING</span></a>
-      <nav>
+      <nav aria-label="Main navigation">
         <a href="#services">Services</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#about">About</a>
-        <a class="nav-cta" href="#book">Book Now</a>
+        <a href="#how-it-works">How it works</a>
+        <a class="nav-cta" href="#estimate">Request Estimate</a>
       </nav>
     </div>
   </header>
@@ -26,9 +26,9 @@
       <div class="wrap hero-content">
         <p class="eyebrow">MOBILE AUTO DETAILING</p>
         <h1>WHERE DIRT<br><span>MEETS ITS DEMISE.</span></h1>
-        <p class="hero-copy">Professional mobile detailing brought straight to you.</p>
+        <p class="hero-copy">Tell us what your vehicle needs. We’ll review your details and photos, then send a personalized estimate before you decide whether to book.</p>
         <div class="hero-buttons">
-          <a class="button button-red" href="#book">BOOK NOW</a>
+          <a class="button button-red" href="#estimate">REQUEST AN ESTIMATE</a>
           <a class="button button-outline" href="#services">VIEW SERVICES</a>
         </div>
       </div>
@@ -36,116 +36,78 @@
 
     <section id="services" class="section">
       <div class="wrap">
-        <p class="eyebrow">WHAT WE DO</p>
-        <h2>DETAILING SERVICES</h2>
-        <div class="cards">
-          <article class="card">
-            <div class="card-icon">01</div>
-            <h3>Exterior Detail</h3>
-            <p>Thorough exterior cleaning and finishing. Final package and pricing will be added here.</p>
-            <a href="#book">Book this service →</a>
-          </article>
-          <article class="card">
-            <div class="card-icon">02</div>
-            <h3>Interior Detail</h3>
-            <p>Deep interior cleaning for the areas that need the most attention. Final package and pricing will be added here.</p>
-            <a href="#book">Book this service →</a>
-          </article>
-          <article class="card">
-            <div class="card-icon">03</div>
-            <h3>Full Detail</h3>
-            <p>Interior and exterior service in one appointment. Final package and pricing will be added here.</p>
-            <a href="#book">Book this service →</a>
-          </article>
+        <p class="eyebrow">CHOOSE WHAT YOU NEED</p>
+        <h2>OUR SERVICES</h2>
+        <p class="section-lead">Select one or more services in your request. Your estimate will be based on the vehicle and its current condition.</p>
+        <div class="cards service-cards">
+          <article class="card"><div class="card-icon">01</div><h3>Burial</h3><p>Tell us what you’re looking for and we’ll review your request before preparing an estimate.</p><a href="#estimate">Request this service →</a></article>
+          <article class="card"><div class="card-icon">02</div><h3>Embalming</h3><p>Share the vehicle details and condition so we can understand the work involved.</p><a href="#estimate">Request this service →</a></article>
+          <article class="card"><div class="card-icon">03</div><h3>Viewing</h3><p>Choose this service in the form and include any details that will help us assess it.</p><a href="#estimate">Request this service →</a></article>
+          <article class="card"><div class="card-icon">04</div><h3>Resurrection</h3><p>Send photos of the vehicle and the areas that need the most attention.</p><a href="#estimate">Request this service →</a></article>
+          <article class="card"><div class="card-icon">05</div><h3>Preneed (Prior Arrangements)</h3><p>Get in touch ahead of time and we’ll review the details with you.</p><a href="#estimate">Request this service →</a></article>
+          <article class="card"><div class="card-icon">06</div><h3>Purple Heart Veteran</h3><p>Select this service and add relevant information to your estimate request.</p><a href="#estimate">Request this service →</a></article>
         </div>
       </div>
     </section>
 
-    <section id="pricing" class="section section-dark">
+    <section id="how-it-works" class="section section-dark">
       <div class="wrap">
-        <p class="eyebrow">SIMPLE PRICING</p>
-        <h2>PACKAGES & ADD-ONS</h2>
-        <p class="section-lead">We’ll replace these placeholders with your exact services, vehicle sizes, prices and add-ons.</p>
-        <div class="price-grid">
-          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
-          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
-          <div class="price-box"><span>PACKAGE</span><strong>$000</strong><small>Starting price</small></div>
+        <p class="eyebrow">CLEAR FROM START TO FINISH</p>
+        <h2>HOW IT WORKS</h2>
+        <div class="steps">
+          <article><span>01</span><h3>Request an estimate</h3><p>Choose services, describe your vehicle and upload condition photos.</p></article>
+          <article><span>02</span><h3>We review and price</h3><p>Your request stays Pending while the owner reviews it and enters an estimate.</p></article>
+          <article><span>03</span><h3>Accept and reserve</h3><p>Accept your estimate, then pay a 25% deposit through Stripe. Your booking is confirmed only after payment succeeds.</p></article>
         </div>
+        <div class="status-flow" aria-label="Request statuses"><span>Pending</span><i>→</i><span>Estimate Sent</span><i>→</i><span>Accepted</span><i>→</i><span>Booked</span><i>→</i><span>Completed</span></div>
       </div>
     </section>
 
-    <section id="about" class="section">
-      <div class="wrap split">
-        <div>
-          <p class="eyebrow">ABOUT KILLER DETAILING</p>
-          <h2>WE BRING THE DETAIL SHOP TO YOU.</h2>
-          <p>Mobile detailing built around convenience, attention to detail and a damn good-looking finish.</p>
-          <p>Our service area, hours and business story will be added here.</p>
-        </div>
-        <div class="feature-panel">
-          <div class="feature-mark">KD</div>
-          <p>Mobile.<br>Professional.<br>Convenient.</p>
-        </div>
-      </div>
-    </section>
-
-    <section id="book" class="section booking">
+    <section id="estimate" class="section booking">
       <div class="wrap booking-wrap">
-        <div>
-          <p class="eyebrow">READY WHEN YOU ARE</p>
-          <h2>BOOK YOUR DETAIL</h2>
-          <p class="section-lead">The booking system will let customers select a service, request an available appointment, and pay their deposit through Stripe.</p>
+        <div class="estimate-intro">
+          <p class="eyebrow">START WITH A FEW DETAILS</p>
+          <h2>REQUEST YOUR ESTIMATE</h2>
+          <p class="section-lead">The more details and clear photos you share, the better we can understand your vehicle. A request does not reserve an appointment.</p>
+          <div class="estimate-note"><strong>What happens after you send it?</strong><p>The owner reviews your request and sets the estimate price. You’ll receive the estimate to accept before booking and any deposit.</p></div>
         </div>
-        <form id="booking-form" class="booking-form">
-          <label>Service
-            <select id="service" required>
-              <option value="">Choose a service</option>
-              <option>Exterior Detail</option>
-              <option>Interior Detail</option>
-              <option>Full Detail</option>
-            </select>
-          </label>
-          <label>Preferred date
-            <input id="date" type="date" required>
-          </label>
-          <label>Preferred time
-            <select id="time" required>
-              <option value="">Choose a time</option>
-              <option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option>
-              <option>11:00 AM</option><option>12:00 PM</option><option>1:00 PM</option>
-              <option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option>
-            </select>
-          </label>
-          <label>Your name
-            <input id="name" type="text" autocomplete="name" required>
-          </label>
-          <label>Phone
-            <input id="phone" type="tel" autocomplete="tel" required>
-          </label>
-          <label>Email
-            <input id="email" type="email" autocomplete="email" required>
-          </label>
-          <label>Vehicle
-            <input id="vehicle" type="text" placeholder="Year / Make / Model" required>
-          </label>
-          <label>Notes
-            <textarea id="notes" rows="4" placeholder="Anything we should know?"></textarea>
-          </label>
-          <button class="button button-red full" type="submit">REQUEST APPOINTMENT</button>
-          <p class="form-note">Payment will be handled securely through Stripe once the booking system is connected.</p>
-          <p id="form-message" class="form-message" role="status"></p>
+        <form id="estimate-form" class="booking-form">
+          <fieldset class="form-section"><legend><span>01</span> Services & vehicle</legend>
+            <div class="field full"><span class="field-title">Services you’re interested in <b>*</b></span><div class="service-options">
+              <label><input type="checkbox" name="services" value="Burial"><span>Burial</span></label>
+              <label><input type="checkbox" name="services" value="Embalming"><span>Embalming</span></label>
+              <label><input type="checkbox" name="services" value="Viewing"><span>Viewing</span></label>
+              <label><input type="checkbox" name="services" value="Resurrection"><span>Resurrection</span></label>
+              <label><input type="checkbox" name="services" value="Preneed (Prior Arrangements)"><span>Preneed (Prior Arrangements)</span></label>
+              <label><input type="checkbox" name="services" value="Purple Heart Veteran"><span>Purple Heart Veteran</span></label>
+            </div><small class="field-hint">Select all that apply.</small></div>
+            <div class="field"><label for="year">Vehicle year <b>*</b></label><input id="year" name="year" inputmode="numeric" maxlength="4" placeholder="e.g. 2021" required></div>
+            <div class="field"><label for="make">Make <b>*</b></label><input id="make" name="make" placeholder="e.g. Toyota" required></div>
+            <div class="field"><label for="model">Model <b>*</b></label><input id="model" name="model" placeholder="e.g. Camry" required></div>
+            <div class="field"><label for="vehicle-type">Vehicle type <b>*</b></label><select id="vehicle-type" name="vehicleType" required><option value="">Choose one</option><option>Car / Sedan</option><option>Coupe / Sports car</option><option>Mid-size SUV / Crossover</option><option>Full-size SUV</option><option>Truck</option><option>Van / Minivan</option><option>Other</option></select></div>
+            <div class="field full"><span class="field-title">Optional area add-ons</span><div class="service-options addon-options">
+              <label><input type="checkbox" name="addons" value="Trunk"><span>Trunk</span></label>
+              <label><input type="checkbox" name="addons" value="Hatch"><span>Hatch</span></label>
+              <label><input type="checkbox" name="addons" value="Truck bed"><span>Truck bed</span></label>
+            </div><small class="field-hint">Choose only the areas that apply to your vehicle.</small></div>
+          </fieldset>
+          <fieldset class="form-section"><legend><span>02</span> Condition & photos</legend>
+            <div class="field full"><label for="condition">Describe the vehicle’s condition and what you’d like done <b>*</b></label><textarea id="condition" name="condition" rows="4" placeholder="Tell us what needs attention, any stains or odors, and other useful details…" required></textarea></div>
+            <div class="field full"><span class="field-title">Vehicle photos</span><p class="field-hint photo-intro">Please add the requested views when possible. You can select multiple photos for problem areas.</p><div id="photo-fields" class="photo-fields"></div><small class="field-hint">Accepted: JPG, PNG, WebP, or HEIC. Maximum 8 MB per photo and 30 MB total.</small></div>
+          </fieldset>
+          <fieldset class="form-section"><legend><span>03</span> Your contact details</legend>
+            <div class="field"><label for="name">Full name <b>*</b></label><input id="name" name="name" autocomplete="name" required></div>
+            <div class="field"><label for="phone">Phone <b>*</b></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
+            <div class="field full"><label for="email">Email <b>*</b></label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+          </fieldset>
+          <label class="form-honey" aria-hidden="true" tabindex="-1">Leave this field empty<input name="website" tabindex="-1" autocomplete="off"></label>
+          <div class="form-submit"><button class="button button-red full" type="submit">SEND ESTIMATE REQUEST <span aria-hidden="true">↗</span></button><p>Submitting sends your request and selected photos for review. It does not book an appointment or charge a deposit. You’ll receive a custom estimate to accept first.</p><p id="form-message" class="form-message" role="status" aria-live="polite"></p></div>
         </form>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap footer-inner">
-      <div><strong>KILLER DETAILING LLC</strong><br><span>Where Dirt Meets Its Demise.</span></div>
-      <div><a href="mailto:YOUR_EMAIL_HERE">YOUR_EMAIL_HERE</a><br><span>Serving YOUR SERVICE AREA</span></div>
-    </div>
-  </footer>
-
+  <footer><div class="wrap footer-inner"><div><strong>KILLER DETAILING LLC</strong><br><span>Where Dirt Meets Its Demise.</span></div><div><a href="#estimate">Request an estimate</a><br><span>We’ll add your business contact details when supplied.</span></div></div></footer>
   <script src="script.js"></script>
 </body>
 </html>
