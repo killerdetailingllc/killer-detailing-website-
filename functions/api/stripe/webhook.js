@@ -1,5 +1,6 @@
 import { json } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
+import { createICloudEvent } from "../../_icloud.js";
 
 function toHex(bytes) { return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join(""); }
 
@@ -31,18 +32,46 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const id = session.metadata?.request_id;
   const deposit = Number(session.metadata?.deposit_cents);
   if (!id || !Number.isSafeInteger(deposit) || session.amount_total !== deposit) return json({ error: "Payment metadata did not match." }, 400);
-  const row = await env.DB.prepare("SELECT status, stripe_session_id, deposit_cents, name, email, year, make, model, vehicle_type FROM estimate_requests WHERE id = ?").bind(id).first();
+  const row = await env.DB.prepare(`SELECT status, stripe_session_id, deposit_cents, estimate_cents, name, email, phone, year, make, model,
+    vehicle_type, service_address, services_json, addons_json, appointment_at, appointment_duration_minutes, calendar_event_uid
+    FROM estimate_requests WHERE id = ?`).bind(id).first();
   if (!row) return json({ error: "Estimate request not found." }, 404);
-  if (row.status === "booked" && row.stripe_session_id === session.id) return json({ received: true });
+  const alreadyBooked = row.status === "booked" && row.stripe_session_id === session.id;
+  if (alreadyBooked && row.calendar_event_uid) return json({ received: true });
+  if (alreadyBooked) {
+    await addCalendarEvent(env, row, id);
+    return json({ received: true });
+  }
   if (row.status !== "accepted" || row.stripe_session_id !== session.id || row.deposit_cents !== deposit) return json({ error: "Payment does not match the accepted estimate." }, 409);
   await env.DB.prepare("UPDATE estimate_requests SET status = 'booked', paid_at = ? WHERE id = ? AND status = 'accepted' AND stripe_session_id = ? AND deposit_cents = ?")
     .bind(new Date().toISOString(), id, session.id, deposit).run();
+  const calendar = await addCalendarEvent(env, row, id);
   if (env.RESEND_API_KEY && env.EMAIL_FROM) {
     const vehicle = `${row.year} ${row.make} ${row.model} (${row.vehicle_type})`;
-    const message = `The 25% deposit payment succeeded and the booking is confirmed.\n\nCustomer: ${row.name}\nEmail: ${row.email}\nVehicle: ${vehicle}\nDeposit paid: ${money(deposit)}\n\nThe booking was confirmed by the verified Stripe payment webhook.`;
+    const services = [...JSON.parse(row.services_json), ...JSON.parse(row.addons_json).map((item) => `Add-on: ${item}`)].join(", ");
+    const appointment = row.appointment_at ? new Date(row.appointment_at).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" }) : "Not scheduled";
+    const calendarStatus = calendar.ok ? "Added to the iCloud calendar." : `Calendar event was not added automatically: ${calendar.reason}`;
+    const message = `The 25% deposit payment succeeded and the booking is confirmed.\n\nAppointment: ${appointment} Eastern\nDuration: ${row.appointment_duration_minutes / 60} hours\nCustomer: ${row.name}\nEmail: ${row.email}\nPhone: ${row.phone}\nService address: ${row.service_address}\nVehicle: ${vehicle}\nServices: ${services}\nEstimate: ${money(row.estimate_cents)}\nDeposit paid: ${money(deposit)}\n\n${calendarStatus}\n\nThe booking was confirmed by the verified Stripe payment webhook.`;
     const tasks = [sendEmail(env, { to: row.email, subject: "Your Killer Detailing booking is confirmed", text: message })];
     if (env.OWNER_NOTIFICATION_EMAIL) tasks.push(sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `Deposit paid — booking confirmed: ${row.name}`, text: message }));
     if (waitUntil) waitUntil(Promise.all(tasks));
   }
   return json({ received: true });
+}
+
+async function addCalendarEvent(env, row, id) {
+  if (row.calendar_event_uid) return { ok: true };
+  if (!row.appointment_at || !row.service_address) return { ok: false, reason: "The appointment time or service address is missing." };
+  try {
+    const result = await createICloudEvent(env, {
+      id, name: row.name, email: row.email, phone: row.phone, year: row.year, make: row.make, model: row.model,
+      vehicle_type: row.vehicle_type, service_address: row.service_address, services: JSON.parse(row.services_json),
+      addons: JSON.parse(row.addons_json), estimate_cents: row.estimate_cents, deposit_cents: row.deposit_cents,
+      appointment_at: row.appointment_at, appointment_duration_minutes: row.appointment_duration_minutes,
+    });
+    if (result.ok) await env.DB.prepare("UPDATE estimate_requests SET calendar_event_uid = ? WHERE id = ? AND calendar_event_uid IS NULL").bind(result.uid, id).run();
+    return result;
+  } catch {
+    return { ok: false, reason: "The iCloud calendar connection could not be reached." };
+  }
 }

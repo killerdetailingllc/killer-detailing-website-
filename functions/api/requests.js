@@ -34,7 +34,8 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const allowedServices = serviceNames();
   const allowedAddons = addonNames();
   const fields = Object.fromEntries(["name", "email", "phone", "year", "make", "model", "vehicleType", "condition"].map((key) => [key, String(form.get(key) || "").trim()]));
-  if (!fields.name || fields.name.length > 140 || !/^\S+@\S+\.\S+$/.test(fields.email) || fields.email.length > 254 || !fields.phone || fields.phone.length > 40 || !/^\d{4}$/.test(fields.year) || !fields.make || fields.make.length > 80 || !fields.model || fields.model.length > 80 || !fields.vehicleType || fields.vehicleType.length > 50 || !fields.condition || fields.condition.length > 3000) {
+  fields.serviceAddress = String(form.get("serviceAddress") || "").trim();
+  if (!fields.name || fields.name.length > 140 || !/^\S+@\S+\.\S+$/.test(fields.email) || fields.email.length > 254 || !fields.phone || fields.phone.length > 40 || !/^\d{4}$/.test(fields.year) || !fields.make || fields.make.length > 80 || !fields.model || fields.model.length > 80 || !fields.vehicleType || fields.vehicleType.length > 50 || !fields.condition || fields.condition.length > 3000 || !fields.serviceAddress || fields.serviceAddress.length > 500) {
     return json({ error: "Please check the required contact, vehicle, and condition fields." }, 400);
   }
   if (!services.length || services.some((item) => !allowedServices.includes(item)) || addons.some((item) => !allowedAddons.includes(item))) return json({ error: "Please choose valid services and add-ons." }, 400);
@@ -57,9 +58,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const photoKeys = [];
   try {
     await env.DB.prepare(`INSERT INTO estimate_requests
-      (id, created_at, name, email, phone, year, make, model, vehicle_type, services_json, addons_json, condition_text)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-      .bind(id, createdAt, fields.name, fields.email, fields.phone, fields.year, fields.make, fields.model, fields.vehicleType, JSON.stringify(services), JSON.stringify(addons), fields.condition).run();
+      (id, created_at, name, email, phone, year, make, model, vehicle_type, services_json, addons_json, condition_text, service_address)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      .bind(id, createdAt, fields.name, fields.email, fields.phone, fields.year, fields.make, fields.model, fields.vehicleType, JSON.stringify(services), JSON.stringify(addons), fields.condition, fields.serviceAddress).run();
 
     for (const { file, label } of photos) {
       const photoId = uuid();
@@ -76,7 +77,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   }
   if (env.OWNER_NOTIFICATION_EMAIL && env.RESEND_API_KEY && env.EMAIL_FROM) {
     const summary = `${fields.year} ${fields.make} ${fields.model} (${fields.vehicleType})`;
-    const message = `A new estimate request was submitted.\n\nCustomer: ${fields.name}\nEmail: ${fields.email}\nPhone: ${fields.phone}\nVehicle: ${summary}\nServices: ${services.join(", ")}\nAdd-ons: ${addons.length ? addons.join(", ") : "None"}\nPhotos: ${photos.length}\n\nReview the request and photos in the owner estimate desk: ${new URL("/admin.html", request.url)}`;
+    const message = `A new estimate request was submitted.\n\nCustomer: ${fields.name}\nEmail: ${fields.email}\nPhone: ${fields.phone}\nService address: ${fields.serviceAddress}\nVehicle: ${summary}\nServices: ${services.join(", ")}\nAdd-ons: ${addons.length ? addons.join(", ") : "None"}\nPhotos: ${photos.length}\n\nReview the request and photos in the owner estimate desk: ${new URL("/admin.html", request.url)}`;
     const task = sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `New estimate request: ${fields.name}`, text: message });
     if (waitUntil) waitUntil(task);
   }

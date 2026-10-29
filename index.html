@@ -93,6 +93,7 @@
             <div class="field"><label for="name">Full name <b>*</b></label><input id="name" name="name" autocomplete="name" required></div>
             <div class="field"><label for="phone">Phone <b>*</b></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
             <div class="field full"><label for="email">Email <b>*</b></label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+            <div class="field full"><label for="service-address">Service address <b>*</b></label><textarea id="service-address" name="serviceAddress" autocomplete="street-address" rows="3" placeholder="Street, city, state, ZIP" required></textarea><small class="field-hint">Where the vehicle will be serviced. We use this to prepare and schedule your estimate, and include it in the owner’s appointment calendar entry.</small></div>
           </fieldset>
           <label class="form-honey" aria-hidden="true" tabindex="-1">Leave this field empty<input name="website" tabindex="-1" autocomplete="off"></label>
           <div class="form-submit"><button class="button button-red full" type="submit">SEND ESTIMATE REQUEST <span aria-hidden="true">↗</span></button><p>Submitting sends your request and selected photos for review. It does not book an appointment or charge a deposit. You’ll receive a custom estimate to accept first.</p><p id="form-message" class="form-message" role="status" aria-live="polite"></p></div>

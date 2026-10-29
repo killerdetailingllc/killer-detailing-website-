@@ -18,7 +18,7 @@ async function api(url, options) {
 function showPaymentState(status) {
   const checkout = query.get("checkout");
   if (status === "booked") {
-    message.textContent = "Payment received. Your booking is confirmed—Killer Detailing will contact you with scheduling details.";
+    message.textContent = "Payment received. Your appointment is confirmed. Killer Detailing will contact you if anything else is needed.";
     acceptButton.hidden = true; payButton.hidden = true; depositPanel.hidden = false;
   } else if (checkout === "success") {
     message.textContent = "Payment is being verified. This page will show your booking as confirmed only after Stripe confirms the payment.";
@@ -35,6 +35,8 @@ async function loadEstimate() {
   document.getElementById("vehicle-line").textContent = `${item.vehicle} · ${item.vehicleType}`;
   document.getElementById("services-line").textContent = `Services: ${item.services.join(", ")}`;
   document.getElementById("addons-line").textContent = item.addons.length ? `Area add-ons: ${item.addons.join(", ")}` : "No area add-ons selected.";
+  document.getElementById("appointment-line").textContent = item.appointmentAt ? `Proposed appointment: ${new Date(item.appointmentAt).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" })} Eastern · ${item.appointmentDurationMinutes / 60} hours` : "";
+  document.getElementById("address-line").textContent = item.serviceAddress ? `Service address: ${item.serviceAddress}` : "";
   document.getElementById("note-line").textContent = item.note || "";
   document.getElementById("total-line").textContent = `Approved estimate: ${money(item.estimateCents)}`;
   document.getElementById("deposit-line").textContent = `25% deposit: ${money(item.depositCents)}`;
