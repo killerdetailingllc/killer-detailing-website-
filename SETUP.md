@@ -4,6 +4,8 @@
 
 The site is a static project with Cloudflare Pages Functions for estimates, photo storage, owner review, and Stripe deposits. The production deployment uses GitHub's `cloudflare-pages-ready` branch and is attached to `killerdetailingllc.com`; GitHub `main` still contains the older Exterior/Interior/Full Detail form. Keep edits on the production branch and do not treat an unpushed local copy as live.
 
+The owner desk groups requests by status: new, waiting for customer approval, accepted, confirmed, completed, cancelled, and declined. Owners can decline a new request, cancel an accepted or confirmed appointment, mark a confirmed appointment completed, and reschedule a confirmed appointment into an open business-hours/iCloud slot. Rescheduling updates its iCloud event. Cancelling a confirmed appointment removes its iCloud event when possible; a paid Stripe deposit is not automatically refunded and must be handled separately in Stripe. Customer estimate links show declined, cancelled, and completed states.
+
 The public form offers three services: Burial (exterior detailing), Embalming (interior detailing), and Viewing (both). Vehicle choices include Full-size SUV and Truck. Trunk, Hatch, and Truck bed are add-on choices. The form accepts up to 15 photos, 8 MB each, 30 MB total; server validation allows JPG, PNG, WebP, and HEIC.
 
 ## What the new code implements

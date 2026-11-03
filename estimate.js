@@ -57,7 +57,16 @@ async function loadSlots() {
 
 function showPaymentState(status) {
   const checkout = query.get("checkout");
-  if (status === "booked") {
+  if (status === "declined") {
+    message.textContent = "This estimate request was declined. Please contact Killer Detailing if you have questions.";
+    acceptButton.hidden = true; payButton.hidden = true; cashButton.hidden = true; picker.hidden = true; depositPanel.hidden = true; cashPanel.hidden = true;
+  } else if (status === "cancelled") {
+    message.textContent = "This appointment or request was cancelled. Please contact Killer Detailing if you need help.";
+    acceptButton.hidden = true; payButton.hidden = true; cashButton.hidden = true; picker.hidden = true; depositPanel.hidden = true; cashPanel.hidden = true;
+  } else if (status === "completed") {
+    message.textContent = "This appointment is marked completed. Thank you for choosing Killer Detailing.";
+    acceptButton.hidden = true; payButton.hidden = true; cashButton.hidden = true; picker.hidden = true; depositPanel.hidden = true; cashPanel.hidden = true;
+  } else if (status === "booked") {
     acceptButton.hidden = true; payButton.hidden = true; cashButton.hidden = true; picker.hidden = true;
     if (currentEstimate?.paymentMethod === "cash") {
       message.textContent = "Your appointment is confirmed. You selected cash; the full estimate is due at the appointment.";

@@ -93,7 +93,7 @@ function parseCalendarBusy(ics) {
       const start = event.start?.start;
       let end = event.end?.start;
       if (start && !end && event.duration) end = new Date(start.getTime() + event.duration);
-      if (start && end && end > start && event.status !== "CANCELLED" && event.transp !== "TRANSPARENT") intervals.push({ start, end });
+      if (start && end && end > start && event.status !== "CANCELLED" && event.transp !== "TRANSPARENT") intervals.push({ start, end, uid: event.uid || null });
       event = null; continue;
     }
     if (!event) continue;
@@ -102,6 +102,7 @@ function parseCalendarBusy(ics) {
     const key = line.slice(0, colon); const value = line.slice(colon + 1);
     if (key.startsWith("DTSTART")) event.start = parseIcsDate(value, key);
     else if (key.startsWith("DTEND")) event.end = parseIcsDate(value, key);
+    else if (key === "UID") event.uid = value;
     else if (key === "DURATION") { const m = value.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/); if (m) event.duration = ((+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0)) * 1000; }
     else if (key === "STATUS") event.status = value.toUpperCase();
     else if (key === "TRANSP") event.transp = value.toUpperCase();
@@ -160,6 +161,11 @@ export async function createICloudEvent(env, booking) {
 
   const uid = `${booking.id}@killerdetailingllc.com`;
   const eventUrl = new URL(`${encodeURIComponent(uid)}.ics`, calendar.url.href.endsWith("/") ? calendar.url : `${calendar.url.href}/`);
+  if (booking.deleteEvent) {
+    const deleted = await fetch(eventUrl, { method: "DELETE", headers: { authorization } });
+    if (deleted.ok || deleted.status === 404) return { ok: true, uid };
+    return { ok: false, reason: `iCloud could not remove the appointment (${deleted.status}).` };
+  }
   const services = [...booking.services, ...booking.addons.map((item) => `Add-on: ${item}`)].join(", ");
   const vehicle = `${booking.year} ${booking.make} ${booking.model} (${booking.vehicle_type})`;
   const description = [
@@ -179,7 +185,17 @@ export async function createICloudEvent(env, booking) {
     `DURATION:PT${Math.round(booking.appointment_duration_minutes / 60)}H`, `SUMMARY:${icsEscape(`Killer Detailing - ${booking.name} - ${vehicle}`)}`,
     `LOCATION:${icsEscape(booking.service_address)}`, `DESCRIPTION:${icsEscape(description)}`, "END:VEVENT", "END:VCALENDAR", "",
   ].join("\r\n");
-  const response = await fetch(eventUrl, { method: "PUT", headers: { authorization, "content-type": "text/calendar; charset=utf-8", "if-none-match": "*" }, body: ics });
+  const headers = { authorization, "content-type": "text/calendar; charset=utf-8" };
+  if (!booking.replaceEvent) headers["if-none-match"] = "*";
+  const response = await fetch(eventUrl, { method: "PUT", headers, body: ics });
   if (response.ok || response.status === 412) return { ok: true, uid };
   return { ok: false, reason: `iCloud could not save the appointment (${response.status}).` };
+}
+
+export function updateICloudEvent(env, booking) {
+  return createICloudEvent(env, { ...booking, replaceEvent: true });
+}
+
+export function deleteICloudEvent(env, id) {
+  return createICloudEvent(env, { id, deleteEvent: true });
 }

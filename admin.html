@@ -8,7 +8,7 @@
   <title>Owner Estimate Desk | Killer Detailing LLC</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-wrap{max-width:1050px;margin:0 auto;padding:55px 20px}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}.admin-panel,.request-card{background:#111;border:1px solid #333;padding:22px;margin:18px 0}.request-card h2{font-size:1.4rem}.request-meta{color:#bbb}.request-photos{display:flex;gap:10px;flex-wrap:wrap}.request-photos img{width:150px;height:110px;object-fit:cover;border:1px solid #444}.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.admin-form textarea{grid-column:1/-1}.admin-form button{grid-column:1/-1}.admin-status{color:#f3c5c7;min-height:1.5em}.request-card details{margin-top:14px}.logout{background:transparent;border:1px solid #666;color:#fff;padding:10px 14px;cursor:pointer}.estimate-link{overflow-wrap:anywhere;color:#ff777d}.login-box{max-width:480px;margin:10vh auto}.login-box label{display:grid;gap:8px}.request-card pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#ddd;font:inherit}.admin-hint{color:#999;font-size:.85rem}@media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form textarea,.admin-form button{grid-column:auto}}
+    .admin-wrap{max-width:1050px;margin:0 auto;padding:55px 20px}.admin-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}.admin-panel,.request-card{background:#111;border:1px solid #333;padding:22px;margin:18px 0}.request-card h2{font-size:1.4rem}.request-meta{color:#bbb}.request-photos{display:flex;gap:10px;flex-wrap:wrap}.request-photos img{width:150px;height:110px;object-fit:cover;border:1px solid #444}.admin-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.admin-form textarea{grid-column:1/-1}.admin-form button{grid-column:1/-1}.admin-status{color:#f3c5c7;min-height:1.5em}.request-card details{margin-top:14px}.logout{background:transparent;border:1px solid #666;color:#fff;padding:10px 14px;cursor:pointer}.estimate-link{overflow-wrap:anywhere;color:#ff777d}.login-box{max-width:480px;margin:10vh auto}.login-box label{display:grid;gap:8px}.request-card pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#ddd;font:inherit}.admin-hint{color:#999;font-size:.85rem}.admin-filter{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.admin-filter select,.reschedule-panel input,.reschedule-panel select{min-height:42px;background:#181818;color:#fff;border:1px solid #555;padding:8px}.appointment-actions,.reschedule-panel{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}.reschedule-panel[hidden]{display:none}.reschedule-panel p{flex-basis:100%;margin:0}@media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form textarea,.admin-form button{grid-column:auto}}
   </style>
 </head>
 <body>
@@ -22,6 +22,18 @@
       <div class="admin-head"><div><p class="eyebrow">PRIVATE OWNER AREA</p><h1 style="font-size:2.4rem;margin:0">ESTIMATE DESK</h1></div><button id="logout" class="logout" type="button">Sign out</button></div>
       <p class="admin-hint">Review the customer’s preferred dates, set the estimate and expected service duration, then send the private customer link. After accepting, the customer chooses from open times that fit your Eastern Time business hours and iCloud calendar. The booking is confirmed after the customer pays the online deposit or chooses cash. The confirmed appointment is then added to iCloud.</p>
       <p id="desk-message" class="admin-status" role="status"></p>
+      <label class="admin-filter" for="status-filter">Show appointments
+        <select id="status-filter">
+          <option value="all">All statuses</option>
+          <option value="pending">New requests</option>
+          <option value="estimate_sent">Waiting for customer</option>
+          <option value="accepted">Accepted / choosing time</option>
+          <option value="booked">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="declined">Declined</option>
+        </select>
+      </label>
       <div id="requests"></div>
     </section>
   </main>

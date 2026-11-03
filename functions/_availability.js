@@ -93,6 +93,42 @@ export async function extendSlotClaim(db, requestId, expiresAt) {
   await db.prepare("UPDATE appointment_slot_claims SET expires_at = ? WHERE request_id = ? AND confirmed_at IS NULL").bind(expiresAt, requestId).run();
 }
 
+export async function moveConfirmedAppointmentSlot(db, requestId, slot) {
+  const now = new Date().toISOString();
+  const statements = [db.prepare("UPDATE estimate_requests SET appointment_at = ? WHERE id = ? AND status = 'booked'").bind(slot.startsAt, requestId)];
+  statements.push(db.prepare("DELETE FROM appointment_slot_claims WHERE request_id = ? AND EXISTS (SELECT 1 FROM estimate_requests WHERE id = ? AND status = 'booked')").bind(requestId, requestId));
+  for (const block of slot.blocks) statements.push(db.prepare(`INSERT INTO appointment_slot_claims (slot_start, request_id, expires_at, confirmed_at)
+    SELECT ?, ?, NULL, ? WHERE EXISTS (SELECT 1 FROM estimate_requests WHERE id = ? AND status = 'booked')`).bind(block, requestId, now, requestId));
+  const results = await db.batch(statements);
+  return Number(results[0]?.meta?.changes || 0) > 0;
+}
+
+export async function updateAppointmentStatus(db, requestId, expectedStatus, newStatus, event) {
+  const now = new Date().toISOString();
+  const statements = [db.prepare("UPDATE estimate_requests SET status = ? WHERE id = ? AND status = ?").bind(newStatus, requestId, expectedStatus)];
+  if (newStatus === "cancelled") statements.push(db.prepare("DELETE FROM appointment_slot_claims WHERE request_id = ? AND EXISTS (SELECT 1 FROM estimate_requests WHERE id = ? AND status = ?)").bind(requestId, requestId, newStatus));
+  statements.push(db.prepare(`INSERT INTO appointment_status_events
+    (id, request_id, event_type, previous_status, new_status, previous_at, new_at, note, created_at)
+    SELECT ?, ?, ?, ?, ?, ?, ?, ?, ? WHERE EXISTS (SELECT 1 FROM estimate_requests WHERE id = ? AND status = ?)`)
+    .bind(event.id, requestId, event.type, expectedStatus, newStatus, event.previousAt || null, event.newAt || null, event.note || "", now, requestId, newStatus));
+  const results = await db.batch(statements);
+  return Number(results[0]?.meta?.changes || 0) > 0;
+}
+
+export async function ensureAppointmentEventsTable(db) {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS appointment_status_events (
+    id TEXT PRIMARY KEY,
+    request_id TEXT NOT NULL REFERENCES estimate_requests(id) ON DELETE CASCADE,
+    event_type TEXT NOT NULL,
+    previous_status TEXT NOT NULL,
+    new_status TEXT NOT NULL,
+    previous_at TEXT,
+    new_at TEXT,
+    note TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL
+  )`).run();
+}
+
 export async function getSlotClaims(db, start, end, now = new Date().toISOString(), exceptRequestId = "") {
   const { results } = await db.prepare(`SELECT slot_start FROM appointment_slot_claims
     WHERE slot_start >= ? AND slot_start < ? AND (confirmed_at IS NOT NULL OR expires_at > ?) AND request_id != ?`)
