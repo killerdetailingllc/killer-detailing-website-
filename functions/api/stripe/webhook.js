@@ -1,6 +1,7 @@
 import { displayServiceNames, json } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
 import { createICloudEvent } from "../../_icloud.js";
+import { ensureSlotClaimsTable, confirmSlotClaims } from "../../_availability.js";
 
 function toHex(bytes) { return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join(""); }
 
@@ -36,6 +37,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     vehicle_type, service_address, services_json, addons_json, appointment_at, appointment_duration_minutes, calendar_event_uid
     FROM estimate_requests WHERE id = ?`).bind(id).first();
   if (!row) return json({ error: "Estimate request not found." }, 404);
+  await ensureSlotClaimsTable(env.DB);
   const alreadyBooked = row.status === "booked" && row.stripe_session_id === session.id;
   if (alreadyBooked && row.calendar_event_uid) return json({ received: true });
   if (alreadyBooked) {
@@ -45,6 +47,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (row.status !== "accepted" || row.stripe_session_id !== session.id || row.deposit_cents !== deposit) return json({ error: "Payment does not match the accepted estimate." }, 409);
   await env.DB.prepare("UPDATE estimate_requests SET status = 'booked', paid_at = ? WHERE id = ? AND status = 'accepted' AND stripe_session_id = ? AND deposit_cents = ?")
     .bind(new Date().toISOString(), id, session.id, deposit).run();
+  await confirmSlotClaims(env.DB, id);
   const calendar = await addCalendarEvent(env, row, id);
   if (env.RESEND_API_KEY && env.EMAIL_FROM) {
     const vehicle = `${row.year} ${row.make} ${row.model} (${row.vehicle_type})`;

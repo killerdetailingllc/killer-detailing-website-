@@ -14,7 +14,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (row.status !== "estimate_sent" || (row.estimate_expires_at && row.estimate_expires_at < new Date().toISOString())) return json({ error: "This estimate can no longer be accepted." }, 409);
   await env.DB.prepare("UPDATE estimate_requests SET status = 'accepted', accepted_at = ? WHERE id = ? AND status = 'estimate_sent'").bind(new Date().toISOString(), row.id).run();
   if (env.OWNER_NOTIFICATION_EMAIL && env.RESEND_API_KEY && env.EMAIL_FROM) {
-    const message = `A customer accepted the estimate for ${row.name}.\n\nApproved estimate: ${money(row.estimate_cents)}\nOnline card deposit: ${money(row.deposit_cents)}\nCustomer: ${row.email}\n\nThe customer can confirm by paying the 25% deposit online or by choosing cash at the appointment (no deposit). The appointment is confirmed once either option is completed.`;
+    const message = `A customer accepted the estimate for ${row.name}.\n\nApproved estimate: ${money(row.estimate_cents)}\nOnline card deposit: ${money(row.deposit_cents)}\nCustomer: ${row.email}\n\nThe customer will select an available appointment time, then confirm by paying the 25% deposit online or choosing cash (no deposit). The appointment is confirmed once either option is completed.`;
     const task = sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `Estimate accepted: ${row.name}`, text: message });
     if (waitUntil) waitUntil(task);
   }

@@ -7,12 +7,6 @@ const requestsRoot = document.getElementById("requests");
 const escapeText = (value) => String(value ?? "");
 const displayServiceNames = (services) => services.map((service) => ({ "Exterior Detail": "Burial", "Interior Detail": "Embalming", "Full Detail": "Viewing" })[service] || service);
 const money = (cents) => cents == null ? "Not set" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
-const localDateTimeValue = (value) => {
-  if (!value) return "";
-  const date = new Date(value);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-};
-
 function node(tag, text, className) {
   const element = document.createElement(tag);
   if (text !== undefined) element.textContent = escapeText(text);
@@ -65,7 +59,6 @@ function renderRequest(item) {
   const form = node("form", undefined, "admin-form");
   const amount = document.createElement("input"); amount.type = "number"; amount.min = "2"; amount.step = "0.01"; amount.required = true; amount.placeholder = "Approved total, e.g. 250"; amount.setAttribute("aria-label", "Approved estimate total");
   if (item.estimate_cents != null) amount.value = (item.estimate_cents / 100).toFixed(2);
-  const appointment = document.createElement("input"); appointment.type = "datetime-local"; appointment.required = true; appointment.setAttribute("aria-label", "Appointment date and time"); appointment.value = localDateTimeValue(item.appointment_at);
   const duration = document.createElement("select"); duration.setAttribute("aria-label", "Appointment duration");
   for (const hours of [1, 2, 3, 4, 5, 6, 8]) {
     const option = document.createElement("option"); option.value = String(hours * 60); option.textContent = `${hours} hour${hours === 1 ? "" : "s"}`;
@@ -75,17 +68,19 @@ function renderRequest(item) {
   const note = document.createElement("textarea"); note.rows = 3; note.maxLength = 2000; note.placeholder = "Notes or estimate details for the customer (optional)"; note.setAttribute("aria-label", "Estimate details"); note.value = item.estimate_note || "";
   const submit = node("button", item.status === "estimate_sent" ? "UPDATE ESTIMATE LINK" : "SET ESTIMATE & CREATE CUSTOMER LINK", "button button-red"); submit.type = "submit";
   const status = node("p", "", "admin-status");
-  form.append(amount, appointment, duration, note, submit, status);
+  const durationLabel = node("label", "Estimated service duration (customers choose an opening that fits)");
+  durationLabel.append(duration);
+  form.append(amount, durationLabel, note, submit, status);
   form.addEventListener("submit", async (event) => {
     event.preventDefault(); submit.disabled = true; status.textContent = "Saving estimate…";
     try {
-      const result = await api("/api/admin/estimate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: item.id, total: amount.value, note: note.value, appointmentAt: new Date(appointment.value).toISOString(), appointmentDurationMinutes: duration.value }) });
+      const result = await api("/api/admin/estimate", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: item.id, total: amount.value, note: note.value, appointmentDurationMinutes: duration.value }) });
       item.status = "estimate_sent";
       item.appointment_at = result.appointmentAt;
       item.appointment_duration_minutes = result.appointmentDurationMinutes;
       statusLabel.textContent = `ESTIMATE SENT · ${new Date(item.created_at).toLocaleString()}`;
       amountLabel.textContent = `Current estimate: ${money(result.estimateCents)} · 25% deposit: ${money(result.depositCents)}`;
-      status.textContent = "Estimate and proposed appointment saved. The calendar event will be added after the customer confirms online payment or chooses cash. Copy this private link and send it to the customer:";
+      status.textContent = "Estimate saved. The customer chooses an available appointment time after accepting. The calendar event will be added after the customer confirms online payment or chooses cash. Copy this private link and send it to the customer:";
       const link = node("a", result.url, "estimate-link"); link.href = result.url; link.target = "_blank"; link.rel = "noopener noreferrer";
       status.append(document.createElement("br"), link);
       const copy = node("button", "Copy customer link", "logout"); copy.type = "button";

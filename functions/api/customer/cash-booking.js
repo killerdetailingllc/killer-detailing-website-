@@ -1,6 +1,7 @@
 import { json, sha256, sameOrigin, displayServiceNames } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
 import { createICloudEvent } from "../../_icloud.js";
+import { ensureSlotClaimsTable, hasActiveSlotClaim, confirmSlotClaims } from "../../_availability.js";
 
 export async function onRequestPost({ request, env, waitUntil }) {
   if (!sameOrigin(request)) return json({ error: "Request origin could not be verified." }, 403);
@@ -17,7 +18,9 @@ export async function onRequestPost({ request, env, waitUntil }) {
     return json({ ok: true, status: "booked", paymentMethod: "cash" });
   }
   if (row.status !== "accepted") return json({ error: "Accept the estimate before confirming a cash appointment." }, 409);
-  if (!row.appointment_at || !row.service_address) return json({ error: "The proposed appointment or service address is missing. Please contact Killer Detailing." }, 409);
+  if (!row.appointment_at || !row.service_address) return json({ error: "The selected appointment time or service address is missing. Please contact Killer Detailing." }, 409);
+  await ensureSlotClaimsTable(env.DB);
+  if (!await hasActiveSlotClaim(env.DB, row.id, row.appointment_at)) return json({ error: "Choose an available appointment time before confirming cash." }, 409);
 
   // Expire any open online checkout before confirming cash, preventing the same estimate from being paid twice.
   if (row.stripe_session_id) {
@@ -40,6 +43,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (latest?.status === "booked" && !latest.paid_at) return json({ ok: true, status: "booked", paymentMethod: "cash" });
     return json({ error: "The booking status changed while confirming cash. Refresh the page to see its current status." }, 409);
   }
+  await confirmSlotClaims(env.DB, row.id);
 
   let calendar = { ok: false, reason: "Calendar credentials are not configured." };
   try {

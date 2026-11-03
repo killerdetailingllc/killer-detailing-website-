@@ -1,4 +1,5 @@
 import { json, sha256, sameOrigin } from "../_utils.js";
+import { ensureSlotClaimsTable, hasActiveSlotClaim, extendSlotClaim } from "../_availability.js";
 
 export async function onRequestPost({ request, env }) {
   if (!sameOrigin(request)) return json({ error: "Request origin could not be verified." }, 403);
@@ -6,10 +7,14 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch { return json({ error: "This estimate link is not valid." }, 400); }
   const rawToken = String(body.token || "");
-  const row = await env.DB.prepare("SELECT id, status, deposit_cents, stripe_session_id, checkout_attempt FROM estimate_requests WHERE estimate_token_hash = ?").bind(await sha256(rawToken)).first();
+  const row = await env.DB.prepare("SELECT id, status, appointment_at, appointment_duration_minutes, deposit_cents, stripe_session_id, checkout_attempt FROM estimate_requests WHERE estimate_token_hash = ?").bind(await sha256(rawToken)).first();
   if (!row) return json({ error: "This estimate link is not valid." }, 404);
   if (row.status === "booked") return json({ booked: true });
   if (row.status !== "accepted") return json({ error: "Accept the estimate before paying the deposit." }, 409);
+  await ensureSlotClaimsTable(env.DB);
+  if (!row.appointment_at || !await hasActiveSlotClaim(env.DB, row.id, row.appointment_at)) return json({ error: "Choose an available appointment time before paying the deposit." }, 409);
+  const checkoutExpiry = Math.floor(Date.now() / 1000) + 115 * 60;
+  await extendSlotClaim(env.DB, row.id, new Date((checkoutExpiry + 5 * 60) * 1000).toISOString());
   if (!row.deposit_cents || row.deposit_cents < 1) return json({ error: "The deposit amount is unavailable." }, 409);
 
   if (row.stripe_session_id) {
@@ -27,7 +32,7 @@ export async function onRequestPost({ request, env }) {
   const success = new URL("/estimate.html", base); success.searchParams.set("token", rawToken); success.searchParams.set("checkout", "success");
   const cancel = new URL("/estimate.html", base); cancel.searchParams.set("token", rawToken); cancel.searchParams.set("checkout", "cancel");
   const params = new URLSearchParams({
-    mode: "payment", success_url: success.toString(), cancel_url: cancel.toString(), customer_creation: "if_required",
+    mode: "payment", success_url: success.toString(), cancel_url: cancel.toString(), customer_creation: "if_required", expires_at: String(checkoutExpiry),
     "line_items[0][price_data][currency]": "usd", "line_items[0][price_data][unit_amount]": String(row.deposit_cents),
     "line_items[0][price_data][product_data][name]": "Killer Detailing approved estimate deposit",
     "line_items[0][quantity]": "1", "metadata[request_id]": row.id,
