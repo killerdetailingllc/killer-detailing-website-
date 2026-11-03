@@ -1,5 +1,6 @@
 import { json, sha256, sameOrigin } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
+import { sendOwnerSms } from "../../_sms.js";
 
 export async function onRequestPost({ request, env, waitUntil }) {
   if (!sameOrigin(request)) return json({ error: "Request origin could not be verified." }, 403);
@@ -16,6 +17,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (env.OWNER_NOTIFICATION_EMAIL && env.RESEND_API_KEY && env.EMAIL_FROM) {
     const message = `A customer accepted the estimate for ${row.name}.\n\nApproved estimate: ${money(row.estimate_cents)}\nOnline card deposit: ${money(row.deposit_cents)}\nCustomer: ${row.email}\n\nThe customer will select an available appointment time, then confirm by paying the 25% deposit online or choosing cash (no deposit). The appointment is confirmed once either option is completed.`;
     const task = sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `Estimate accepted: ${row.name}`, text: message });
+    if (waitUntil) waitUntil(task);
+  }
+  if (env.OWNER_NOTIFICATION_PHONE && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER) {
+    const task = sendOwnerSms(env, "Killer Detailing: a customer accepted an estimate. Check the Owner Estimate Desk for details and appointment selection.");
     if (waitUntil) waitUntil(task);
   }
   return json({ ok: true, status: "accepted" });

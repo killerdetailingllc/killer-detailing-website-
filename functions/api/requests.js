@@ -1,5 +1,6 @@
 import { addonNames, json, safeFileName, serviceNames, sha256, uuid, validPhotoType } from "../_utils.js";
 import { sendEmail } from "../_email.js";
+import { sendOwnerSms } from "../_sms.js";
 
 const photoLabels = new Map([
   ["photo-front", "Front"], ["photo-rear", "Rear"], ["photo-driver-side", "Driver side"],
@@ -92,6 +93,10 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const dateMessage = preferredDates.length ? `\nPreferred dates (not confirmed): ${preferredDates.join(", ")}` : "";
     const message = `A new estimate request was submitted.\n\nCustomer: ${fields.name}\nEmail: ${fields.email}\nPhone: ${fields.phone}\nService address: ${fields.serviceAddress}\nVehicle: ${summary}\nServices: ${services.join(", ")}\nAdd-ons: ${addons.length ? addons.join(", ") : "None"}${dateMessage}\nPhotos: ${photos.length}\n\nReview the request and photos in the owner estimate desk: ${new URL("/admin.html", request.url)}`;
     const task = sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `New estimate request: ${fields.name}`, text: message });
+    if (waitUntil) waitUntil(task);
+  }
+  if (env.OWNER_NOTIFICATION_PHONE && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER) {
+    const task = sendOwnerSms(env, "Killer Detailing: a new estimate request came in. Sign in to the Owner Estimate Desk to review it.");
     if (waitUntil) waitUntil(task);
   }
   return json({ ok: true }, 201);

@@ -9,7 +9,7 @@ The public form offers three services: Burial (exterior detailing), Embalming (i
 ## What the new code implements
 
 - Public estimate requests are saved to Cloudflare D1. Uploaded photos are stored in a private R2 bucket. Requests have a five-per-hour limit per IP hash and a honeypot field.
-- The owner estimate desk at `/admin.html` requires a password and an HttpOnly, Secure, SameSite session cookie. It lists requests and displays privately stored photos. When email is configured, the owner receives alerts for new requests and accepted estimates.
+- The owner estimate desk at `/admin.html` requires a password and an HttpOnly, Secure, SameSite session cookie. It lists requests and displays privately stored photos. When email or optional SMS is configured, the owner receives alerts for new requests and accepted estimates.
 - The owner enters a custom total. The server calculates the 25% deposit and creates a customer-specific estimate link that expires after seven days. When email is configured, the link and estimate are emailed to the customer automatically; the dashboard also returns the link for manual sending if needed.
 - The customer accepts the estimate before checkout is available. Stripe Checkout charges only the server-calculated 25% deposit. A signed Stripe webhook at `/api/stripe/webhook` marks the booking confirmed only after verified successful payment.
 - When email is configured, the customer and owner receive booking confirmation after the verified payment webhook succeeds.
@@ -56,3 +56,13 @@ No DNS records, hosting settings, Stripe settings, secrets, or GitHub files have
 The owner sets the estimate and expected service duration in the estimate desk. After accepting, customers choose a date and time from the openings that fit the duration, business hours, and the selected iCloud calendar. Business hours are Monday–Friday, 6–11 p.m., and Saturday–Sunday, 10 a.m.–11 p.m. Eastern. Start times are offered every 30 minutes, up to 60 days ahead. A chosen time is held for two hours; when Stripe Checkout starts, its session expires after 115 minutes and the hold includes a five-minute buffer. If the iCloud calendar cannot be checked, the site does not offer times. Cash bookings and verified successful Stripe payments confirm the selected appointment and create the iCloud event with the customer's contact details, service address, vehicle, services, add-ons, estimate, and payment details.
 
 The appointment columns come from `migrations/0002_calendar_appointments.sql`. The slot-hold table is created automatically by the Pages Function when first needed. iCloud uses `APPLE_CALENDAR_EMAIL` (Apple Account sign-in email) and `APPLE_CALENDAR_APP_PASSWORD` (encrypted Cloudflare Secret); optional `APPLE_CALENDAR_NAME` chooses a calendar by its displayed name, otherwise the first calendar is used. Create the app-specific password from Apple Account settings and enter it directly in Cloudflare; never send it through chat or store it in GitHub. Apple requires two-factor authentication for app-specific passwords. See [Apple’s app-specific password instructions](https://support.apple.com/en-us/102654). A successful payment or cash confirmation still books the appointment if adding the iCloud event fails; the owner notification explains that the calendar entry needs attention.
+
+## Optional owner text alerts
+
+The application can send short SMS alerts for a new estimate request and when a customer accepts an estimate. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages:
+
+- `OWNER_NOTIFICATION_PHONE`: destination phone in E.164 format, such as `+15551234567`.
+- `TWILIO_ACCOUNT_SID` and `TWILIO_FROM_NUMBER`: Twilio account SID and SMS-capable Twilio number.
+- `TWILIO_AUTH_TOKEN`: encrypted Cloudflare Secret. Enter credentials directly in Cloudflare, never in chat or source control.
+
+Twilio currently lists a U.S. long-code number at $1.15/month and outbound SMS at $0.0083 per segment, with carrier fees and A2P registration costs potentially added. U.S. long-code messaging requires A2P 10DLC registration and a paid Twilio account. Review [Twilio U.S. SMS pricing](https://www.twilio.com/en-us/sms/pricing/us) and [Twilio A2P 10DLC requirements](https://www.twilio.com/docs/messaging/compliance/a2p-10dlc/quickstart) before activating texts; prices and registration fees may change.
