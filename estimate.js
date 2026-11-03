@@ -6,6 +6,7 @@ const acceptButton = document.getElementById("accept-estimate");
 const payButton = document.getElementById("pay-deposit");
 const depositPanel = document.getElementById("deposit-panel");
 const money = (cents) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+const displayServiceNames = (services) => services.map((service) => ({ "Exterior Detail": "Burial", "Interior Detail": "Embalming", "Full Detail": "Viewing" })[service] || service);
 let paymentPolls = 0;
 
 async function api(url, options) {
@@ -33,7 +34,7 @@ async function loadEstimate() {
   details.hidden = false;
   document.getElementById("customer-line").textContent = `Prepared for ${item.name}`;
   document.getElementById("vehicle-line").textContent = `${item.vehicle} · ${item.vehicleType}`;
-  document.getElementById("services-line").textContent = `Services: ${item.services.join(", ")}`;
+  document.getElementById("services-line").textContent = `Services: ${displayServiceNames(item.services).join(", ")}`;
   document.getElementById("addons-line").textContent = item.addons.length ? `Area add-ons: ${item.addons.join(", ")}` : "No area add-ons selected.";
   document.getElementById("appointment-line").textContent = item.appointmentAt ? `Proposed appointment: ${new Date(item.appointmentAt).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" })} Eastern · ${item.appointmentDurationMinutes / 60} hours` : "";
   document.getElementById("address-line").textContent = item.serviceAddress ? `Service address: ${item.serviceAddress}` : "";

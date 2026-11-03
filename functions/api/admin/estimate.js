@@ -1,4 +1,4 @@
-import { isAdmin, json, token, sha256 } from "../../_utils.js";
+import { displayServiceNames, isAdmin, json, token, sha256 } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
 
 export async function onRequestPost({ request, env, waitUntil }) {
@@ -29,7 +29,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   url.searchParams.set("token", rawToken);
   if (env.RESEND_API_KEY && env.EMAIL_FROM && record.email) {
     const depositText = money(deposit);
-    const message = `Hello ${record.name},\n\nYour custom estimate is ready.\n\nProposed appointment: ${appointmentDate.toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" })} Eastern (${durationMinutes / 60} hours)\nService address: ${record.service_address}\nVehicle: ${record.year} ${record.make} ${record.model} (${record.vehicle_type})\nServices: ${JSON.parse(record.services_json).join(", ")}\nAdd-ons: ${JSON.parse(record.addons_json).join(", ") || "None"}\nEstimate: ${money(cents)}\nDeposit to confirm: ${depositText}\n${note ? `\nNote from the detailer: ${note}\n` : "\n"}\nReview and accept your estimate here: ${url}\n\nThe appointment is confirmed only after the deposit payment succeeds.`;
+  const message = `Hello ${record.name},\n\nYour custom estimate is ready.\n\nProposed appointment: ${appointmentDate.toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" })} Eastern (${durationMinutes / 60} hours)\nService address: ${record.service_address}\nVehicle: ${record.year} ${record.make} ${record.model} (${record.vehicle_type})\nServices: ${displayServiceNames(JSON.parse(record.services_json)).join(", ")}\nAdd-ons: ${JSON.parse(record.addons_json).join(", ") || "None"}\nEstimate: ${money(cents)}\nDeposit to confirm: ${depositText}\n${note ? `\nNote from the detailer: ${note}\n` : "\n"}\nReview and accept your estimate here: ${url}\n\nThe appointment is confirmed only after the deposit payment succeeds.`;
     const task = sendEmail(env, { to: record.email, subject: "Your Killer Detailing estimate is ready", text: message });
     if (waitUntil) waitUntil(task);
   }

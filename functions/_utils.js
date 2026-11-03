@@ -71,7 +71,12 @@ export function validPhotoType(type) {
 }
 
 export function serviceNames() {
-  return ["Exterior Detail", "Interior Detail", "Full Detail"];
+  return ["Burial", "Embalming", "Viewing"];
+}
+
+export function displayServiceNames(services) {
+  const legacyLabels = { "Exterior Detail": "Burial", "Interior Detail": "Embalming", "Full Detail": "Viewing" };
+  return services.map((service) => legacyLabels[service] || service);
 }
 
 export function addonNames() {

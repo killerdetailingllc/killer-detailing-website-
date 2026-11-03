@@ -1,4 +1,4 @@
-import { json } from "../../_utils.js";
+import { displayServiceNames, json } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
 import { createICloudEvent } from "../../_icloud.js";
 
@@ -48,7 +48,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const calendar = await addCalendarEvent(env, row, id);
   if (env.RESEND_API_KEY && env.EMAIL_FROM) {
     const vehicle = `${row.year} ${row.make} ${row.model} (${row.vehicle_type})`;
-    const services = [...JSON.parse(row.services_json), ...JSON.parse(row.addons_json).map((item) => `Add-on: ${item}`)].join(", ");
+    const services = [...displayServiceNames(JSON.parse(row.services_json)), ...JSON.parse(row.addons_json).map((item) => `Add-on: ${item}`)].join(", ");
     const appointment = row.appointment_at ? new Date(row.appointment_at).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "full", timeStyle: "short" }) : "Not scheduled";
     const calendarStatus = calendar.ok ? "Added to the iCloud calendar." : `Calendar event was not added automatically: ${calendar.reason}`;
     const message = `The 25% deposit payment succeeded and the booking is confirmed.\n\nAppointment: ${appointment} Eastern\nDuration: ${row.appointment_duration_minutes / 60} hours\nCustomer: ${row.name}\nEmail: ${row.email}\nPhone: ${row.phone}\nService address: ${row.service_address}\nVehicle: ${vehicle}\nServices: ${services}\nEstimate: ${money(row.estimate_cents)}\nDeposit paid: ${money(deposit)}\n\n${calendarStatus}\n\nThe booking was confirmed by the verified Stripe payment webhook.`;
@@ -65,7 +65,7 @@ async function addCalendarEvent(env, row, id) {
   try {
     const result = await createICloudEvent(env, {
       id, name: row.name, email: row.email, phone: row.phone, year: row.year, make: row.make, model: row.model,
-      vehicle_type: row.vehicle_type, service_address: row.service_address, services: JSON.parse(row.services_json),
+      vehicle_type: row.vehicle_type, service_address: row.service_address, services: displayServiceNames(JSON.parse(row.services_json)),
       addons: JSON.parse(row.addons_json), estimate_cents: row.estimate_cents, deposit_cents: row.deposit_cents,
       appointment_at: row.appointment_at, appointment_duration_minutes: row.appointment_duration_minutes,
     });

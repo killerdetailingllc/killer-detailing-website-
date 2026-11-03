@@ -5,6 +5,7 @@ const loginMessage = document.getElementById("login-message");
 const deskMessage = document.getElementById("desk-message");
 const requestsRoot = document.getElementById("requests");
 const escapeText = (value) => String(value ?? "");
+const displayServiceNames = (services) => services.map((service) => ({ "Exterior Detail": "Burial", "Interior Detail": "Embalming", "Full Detail": "Viewing" })[service] || service);
 const money = (cents) => cents == null ? "Not set" : new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
 const localDateTimeValue = (value) => {
   if (!value) return "";
@@ -34,7 +35,7 @@ function renderRequest(item) {
   card.append(node("p", `${item.vehicle_type} · ${item.email} · ${item.phone}`, "request-meta"));
   card.append(node("p", `Service address: ${item.service_address || "Not provided"}`, "request-meta"));
   if (item.appointment_at) card.append(node("p", `Appointment: ${new Date(item.appointment_at).toLocaleString()} · ${item.appointment_duration_minutes / 60} hours${item.calendar_event_uid ? " · Added to iCloud" : " · Calendar event pending"}`, "request-meta"));
-  card.append(node("p", `Services: ${item.services.join(", ")}`));
+  card.append(node("p", `Services: ${displayServiceNames(item.services).join(", ")}`));
   if (item.addons.length) card.append(node("p", `Area add-ons: ${item.addons.join(", ")}`));
   const amountLabel = node("p", `Current estimate: ${money(item.estimate_cents)} · 25% deposit: ${money(item.deposit_cents)}`);
   card.append(amountLabel);
