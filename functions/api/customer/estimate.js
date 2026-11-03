@@ -11,5 +11,6 @@ export async function onRequestGet({ request, env }) {
   return json({ status: row.status, name: row.name, vehicle: `${row.year} ${row.make} ${row.model}`, vehicleType: row.vehicle_type,
     services: JSON.parse(row.services_json), addons: JSON.parse(row.addons_json), estimateCents: row.estimate_cents,
     depositCents: row.deposit_cents, note: row.estimate_note, acceptedAt: row.accepted_at, paidAt: row.paid_at,
+    paymentMethod: row.status === "booked" ? (row.paid_at ? "stripe" : "cash") : null,
     appointmentAt: row.appointment_at, appointmentDurationMinutes: row.appointment_duration_minutes, serviceAddress: row.service_address });
 }

@@ -37,7 +37,11 @@ function renderRequest(item) {
   if (item.appointment_at) card.append(node("p", `Appointment: ${new Date(item.appointment_at).toLocaleString()} · ${item.appointment_duration_minutes / 60} hours${item.calendar_event_uid ? " · Added to iCloud" : " · Calendar event pending"}`, "request-meta"));
   card.append(node("p", `Services: ${displayServiceNames(item.services).join(", ")}`));
   if (item.addons.length) card.append(node("p", `Area add-ons: ${item.addons.join(", ")}`));
-  const amountLabel = node("p", `Current estimate: ${money(item.estimate_cents)} · 25% deposit: ${money(item.deposit_cents)}`);
+  const amountLabel = node("p", item.payment_method === "cash"
+    ? `Cash booking — no deposit collected · ${money(item.estimate_cents)} due at appointment`
+    : item.payment_method === "stripe"
+      ? `Online deposit paid: ${money(item.deposit_cents)} · Estimate total: ${money(item.estimate_cents)}`
+      : `Current estimate: ${money(item.estimate_cents)} · 25% online deposit: ${money(item.deposit_cents)} or cash with no deposit`);
   card.append(amountLabel);
   card.append(node("pre", item.condition_text));
   if (item.photos.length) {
@@ -79,7 +83,7 @@ function renderRequest(item) {
       item.appointment_duration_minutes = result.appointmentDurationMinutes;
       statusLabel.textContent = `ESTIMATE SENT · ${new Date(item.created_at).toLocaleString()}`;
       amountLabel.textContent = `Current estimate: ${money(result.estimateCents)} · 25% deposit: ${money(result.depositCents)}`;
-      status.textContent = "Estimate and proposed appointment saved. The calendar event will be added after the deposit succeeds. Copy this private link and send it to the customer:";
+      status.textContent = "Estimate and proposed appointment saved. The calendar event will be added after the customer confirms online payment or chooses cash. Copy this private link and send it to the customer:";
       const link = node("a", result.url, "estimate-link"); link.href = result.url; link.target = "_blank"; link.rel = "noopener noreferrer";
       status.append(document.createElement("br"), link);
       const copy = node("button", "Copy customer link", "logout"); copy.type = "button";

@@ -12,5 +12,5 @@ export async function onRequestGet({ request, env }) {
     if (!photos.has(photo.request_id)) photos.set(photo.request_id, []);
     photos.get(photo.request_id).push(photo);
   }
-  return json({ requests: (results || []).map((row) => ({ ...row, services: JSON.parse(row.services_json), addons: JSON.parse(row.addons_json), photos: photos.get(row.id) || [] })) });
+  return json({ requests: (results || []).map((row) => ({ ...row, payment_method: row.status === "booked" ? (row.paid_at ? "stripe" : "cash") : null, services: JSON.parse(row.services_json), addons: JSON.parse(row.addons_json), photos: photos.get(row.id) || [] })) });
 }

@@ -73,7 +73,9 @@ export async function createICloudEvent(env, booking) {
     `Vehicle: ${vehicle}`,
     `Services: ${services}`,
     `Estimate: $${(booking.estimate_cents / 100).toFixed(2)}`,
-    `Deposit paid: $${(booking.deposit_cents / 100).toFixed(2)}`,
+    booking.payment_method === "cash"
+      ? `Payment: cash due at appointment $${(booking.estimate_cents / 100).toFixed(2)} (no deposit)`
+      : `Deposit paid: $${(booking.deposit_cents / 100).toFixed(2)}`,
   ].join("\\n");
   const ics = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Killer Detailing LLC//Appointment//EN", "CALSCALE:GREGORIAN", "BEGIN:VEVENT",

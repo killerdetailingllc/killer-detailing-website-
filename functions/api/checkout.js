@@ -42,6 +42,13 @@ export async function onRequestPost({ request, env }) {
     console.error("Stripe Checkout session creation failed", { status: stripeResponse.status, type: stripeError.type || null, code: stripeError.code || null });
     return json({ error: "Stripe could not start checkout. Please try again or contact the business." }, 502);
   }
-  await env.DB.prepare("UPDATE estimate_requests SET stripe_session_id = ?, checkout_attempt = ? WHERE id = ? AND status = 'accepted'").bind(session.id, sessionNumber, row.id).run();
+  const saved = await env.DB.prepare("UPDATE estimate_requests SET stripe_session_id = ?, checkout_attempt = ? WHERE id = ? AND status = 'accepted'").bind(session.id, sessionNumber, row.id).run();
+  if (!saved.meta?.changes) {
+    // Cash confirmation may have won while Stripe was creating this checkout session.
+    await fetch("https://api.stripe.com/v1/checkout/sessions/" + encodeURIComponent(session.id) + "/expire", {
+      method: "POST", headers: { authorization: "Bearer " + env.STRIPE_SECRET_KEY },
+    }).catch(() => {});
+    return json({ error: "This estimate was confirmed while checkout was starting. Refresh the estimate page to see the booking." }, 409);
+  }
   return json({ url: session.url });
 }
