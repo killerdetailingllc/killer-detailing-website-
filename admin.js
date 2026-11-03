@@ -43,7 +43,9 @@ function renderRequest(item) {
       ? `Online deposit paid: ${money(item.deposit_cents)} · Estimate total: ${money(item.estimate_cents)}`
       : `Current estimate: ${money(item.estimate_cents)} · 25% online deposit: ${money(item.deposit_cents)} or cash with no deposit`);
   card.append(amountLabel);
-  card.append(node("pre", item.condition_text));
+  const datePreference = item.condition_text.match(/^\[Preferred appointment dates — not confirmed\] ([^\r\n]+)\r?\n\r?\nCustomer’s condition notes:\r?\n/);
+  if (datePreference) card.append(node("p", `Customer’s preferred dates (not confirmed): ${datePreference[1]}`, "request-meta"));
+  card.append(node("pre", datePreference ? item.condition_text.slice(datePreference[0].length) : item.condition_text));
   if (item.photos.length) {
     const gallery = node("div", undefined, "request-photos");
     for (const photo of item.photos) {

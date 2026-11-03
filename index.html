@@ -93,6 +93,9 @@
             <div class="field"><label for="name">Full name <b>*</b></label><input id="name" name="name" autocomplete="name" required></div>
             <div class="field"><label for="phone">Phone <b>*</b></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
             <div class="field full"><label for="email">Email <b>*</b></label><input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
+            <div class="field"><label for="preferred-date">Preferred appointment date</label><input id="preferred-date" name="preferredDate" type="date"><small class="field-hint">Optional. We’ll try to work with your schedule.</small></div>
+            <div class="field"><label for="alternate-date">Backup date</label><input id="alternate-date" name="alternateDate" type="date"><small class="field-hint">Optional. Choose another day that works for you.</small></div>
+            <div class="field full"><p class="field-hint">These are date requests, not confirmed availability. We’ll send an exact proposed appointment time with your estimate. Your booking is confirmed only after you choose online deposit or cash.</p></div>
             <div class="field full"><label for="service-address">Service address <b>*</b></label><textarea id="service-address" name="serviceAddress" autocomplete="street-address" rows="3" placeholder="Street, city, state, ZIP" required></textarea><small class="field-hint">Where the vehicle will be serviced. We use this to prepare and schedule your estimate, and include it in the owner’s appointment calendar entry.</small></div>
           </fieldset>
           <label class="form-honey" aria-hidden="true" tabindex="-1">Leave this field empty<input name="website" tabindex="-1" autocomplete="off"></label>
@@ -103,6 +106,6 @@
   </main>
 
   <footer><div class="wrap footer-inner"><div><strong>KILLER DETAILING LLC</strong><br><span>Where Dirt Meets Its Demise.</span></div><div><a href="#estimate">Request an estimate</a><br><span>Estimate requests: <a href="mailto:estimaterequest@killerdetailingllc.com">estimaterequest@killerdetailingllc.com</a></span></div></div></footer>
-  <script src="script.js"></script>
+  <script src="script.js?v=20261103-dates"></script>
 </body>
 </html>

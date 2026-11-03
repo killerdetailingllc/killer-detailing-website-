@@ -23,6 +23,10 @@ photoAngles.forEach(([key, title]) => {
 const form = document.getElementById("estimate-form");
 const message = document.getElementById("form-message");
 const submitButton = form.querySelector('button[type="submit"]');
+const dateInputs = [document.getElementById("preferred-date"), document.getElementById("alternate-date")];
+const today = new Date();
+const todayLocal = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+dateInputs.forEach((input) => { input.min = todayLocal; });
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   message.classList.remove("is-error");
@@ -31,6 +35,12 @@ form.addEventListener("submit", async (event) => {
     message.textContent = "Please select at least one service.";
     message.classList.add("is-error");
     form.querySelector('input[name="services"]').focus();
+    return;
+  }
+  if (dateInputs.every((input) => input.value) && dateInputs[0].value === dateInputs[1].value) {
+    message.textContent = "Please choose two different preferred dates, or leave the backup date blank.";
+    message.classList.add("is-error");
+    dateInputs[1].focus();
     return;
   }
   submitButton.disabled = true;
