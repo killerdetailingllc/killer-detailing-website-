@@ -61,10 +61,10 @@ The appointment columns come from `migrations/0002_calendar_appointments.sql`. T
 
 ## Optional owner text alerts
 
-The application can send short SMS alerts for a new estimate request and when a customer accepts an estimate. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages:
+The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages:
 
 - `OWNER_NOTIFICATION_PHONE`: destination phone in E.164 format, such as `+15551234567`.
 - `TWILIO_ACCOUNT_SID` and `TWILIO_FROM_NUMBER`: Twilio account SID and SMS-capable Twilio number.
 - `TWILIO_AUTH_TOKEN`: encrypted Cloudflare Secret. Enter credentials directly in Cloudflare, never in chat or source control.
 
-Twilio currently lists a U.S. long-code number at $1.15/month and outbound SMS at $0.0083 per segment, with carrier fees and A2P registration costs potentially added. U.S. long-code messaging requires A2P 10DLC registration and a paid Twilio account. Review [Twilio U.S. SMS pricing](https://www.twilio.com/en-us/sms/pricing/us) and [Twilio A2P 10DLC requirements](https://www.twilio.com/docs/messaging/compliance/a2p-10dlc/quickstart) before activating texts; prices and registration fees may change.
+For U.S. recipients, Twilio currently lists outbound SMS at $0.0083 per message segment, plus carrier fees and number rental; A2P 10DLC registration fees can also apply. U.S. long-code business messaging requires a paid Twilio account, a number, and approved A2P 10DLC registration. Review [Twilio U.S. SMS pricing](https://www.twilio.com/en-us/sms/pricing/us) and [Twilio A2P 10DLC requirements](https://www.twilio.com/docs/messaging/compliance/a2p-10dlc/quickstart) before activating texts; pricing and fees may change.

@@ -1,5 +1,6 @@
 import { displayServiceNames, json } from "../../_utils.js";
 import { sendEmail, money } from "../../_email.js";
+import { sendOwnerSms } from "../../_sms.js";
 import { createICloudEvent } from "../../_icloud.js";
 import { ensureSlotClaimsTable, confirmSlotClaims } from "../../_availability.js";
 
@@ -58,6 +59,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
     const tasks = [sendEmail(env, { to: row.email, subject: "Your Killer Detailing booking is confirmed", text: message })];
     if (env.OWNER_NOTIFICATION_EMAIL) tasks.push(sendEmail(env, { to: env.OWNER_NOTIFICATION_EMAIL, subject: `Deposit paid — booking confirmed: ${row.name}`, text: message }));
     if (waitUntil) waitUntil(Promise.all(tasks));
+  }
+  if (env.OWNER_NOTIFICATION_PHONE && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM_NUMBER) {
+    const appointment = row.appointment_at ? new Date(row.appointment_at).toLocaleString("en-US", { timeZone: "America/New_York", dateStyle: "medium", timeStyle: "short" }) : "time not set";
+    const task = sendOwnerSms(env, `Killer Detailing: Online deposit paid; appointment confirmed for ${appointment} Eastern. Check the Owner Estimate Desk for customer details and services.`);
+    if (waitUntil) waitUntil(task);
   }
   return json({ received: true });
 }
