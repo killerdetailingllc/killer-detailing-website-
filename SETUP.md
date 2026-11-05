@@ -61,11 +61,12 @@ The appointment columns come from `migrations/0002_calendar_appointments.sql`. T
 
 ## Optional owner text alerts
 
-The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages and the business owner submits explicit consent at `/sms-opt-in.html`. Consent is stored in D1; alerts are sent only to the phone number configured as `OWNER_NOTIFICATION_PHONE` and only after that number is recorded through the opt-in form.
+The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS remains disabled unless `TWILIO_SMS_ENABLED` is set to `true`, Twilio settings are configured in Cloudflare Pages, the A2P campaign is approved, and the business owner submits explicit consent at `/sms-opt-in.html`. Consent is stored in D1; alerts are sent only to the phone number configured as `OWNER_NOTIFICATION_PHONE` and only after that number is recorded through the opt-in form.
 
 - `OWNER_NOTIFICATION_PHONE`: destination phone in E.164 format, such as `+15551234567`.
 - `TWILIO_ACCOUNT_SID` and `TWILIO_FROM_NUMBER`: Twilio account SID and SMS-capable Twilio number.
 - `TWILIO_AUTH_TOKEN`: encrypted Cloudflare Secret. Enter credentials directly in Cloudflare, never in chat or source control.
+- `TWILIO_SMS_ENABLED`: set to `true` only after the A2P campaign is approved, Twilio secrets are configured, and the owner has submitted the consent form. Leave unset or set to `false` while registration is pending.
 
 The campaign registration references `/privacy.html`, `/terms.html`, and `/sms-opt-in.html`. The owner must submit the opt-in form directly after it is deployed. The form requires the configured owner phone number and an unchecked consent box; it records the consent timestamp and attempts to send the standard confirmation text. The confirmation and event alerts will not deliver until Twilio enables the A2P campaign. Twilio may still require account verification and campaign submission in its console.
 

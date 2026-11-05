@@ -1,5 +1,6 @@
 // Optional Twilio SMS alerts. Keep the auth token in a Cloudflare Secret.
 export async function sendOwnerSms(env, message) {
+  if (String(env.TWILIO_SMS_ENABLED || "").toLowerCase() !== "true") return false;
   const accountSid = String(env.TWILIO_ACCOUNT_SID || "").trim();
   const authToken = String(env.TWILIO_AUTH_TOKEN || "").trim();
   const from = String(env.TWILIO_FROM_NUMBER || "").trim();
