@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080808">
+  <title>Owner Text Alert Sign-up | Killer Detailing LLC</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .sms-wrap{max-width:680px;margin:0 auto;padding:64px 20px}.sms-panel{background:#111;border:1px solid #333;padding:28px}.sms-panel h1{font-size:clamp(2rem,6vw,3.3rem)}.sms-panel form{display:grid;gap:16px}.sms-panel label{display:grid;gap:8px}.sms-panel input[type=tel]{width:100%;min-height:48px;padding:12px;background:#181818;color:#fff;border:1px solid #555}.sms-consent{display:flex!important;align-items:flex-start;gap:12px!important;line-height:1.6}.sms-consent input{margin-top:5px}.sms-message{min-height:1.5em;color:#f3c5c7}.sms-foot{color:#aaa;font-size:.92rem}.sms-links{display:flex;gap:18px;flex-wrap:wrap;margin-top:24px}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="wrap nav"><a class="brand" href="/">KILLER <span>DETAILING</span></a><nav aria-label="Owner navigation"><a href="/admin.html">Owner Estimate Desk</a></nav></div></header>
+  <main class="sms-wrap">
+    <section class="sms-panel">
+      <p class="eyebrow">OWNER ALERTS</p>
+      <h1>Sign up for business text alerts</h1>
+      <p>This form is for the Killer Detailing LLC business owner. It signs up the owner to receive automated account alerts when a new estimate request arrives, a customer accepts an estimate, or an appointment is confirmed.</p>
+      <form id="sms-form">
+        <label for="sms-phone">Owner mobile phone number
+          <input id="sms-phone" name="phone" type="tel" autocomplete="tel" placeholder="850-555-0123" required>
+        </label>
+        <label class="sms-consent"><input id="sms-consent" name="smsConsent" type="checkbox" required><span>I agree to receive recurring automated account notification text messages from Killer Detailing LLC at the number above. Message frequency varies based on estimate and appointment activity. Consent is not a condition of purchase. Message and data rates may apply. Reply STOP to opt out or HELP for help.</span></label>
+        <label class="form-honey" aria-hidden="true" tabindex="-1">Leave this field empty<input name="website" tabindex="-1" autocomplete="off"></label>
+        <button class="button button-red" type="submit">SIGN UP FOR OWNER TEXT ALERTS</button>
+        <p id="sms-message" class="sms-message" role="status" aria-live="polite"></p>
+      </form>
+      <p class="sms-foot">No promotional messages are sent. This consent covers business-owner account alerts only. Reply STOP at any time to stop messages; reply HELP for assistance.</p>
+      <div class="sms-links"><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms &amp; Conditions</a></div>
+    </section>
+  </main>
+  <script>
+    document.getElementById("sms-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const message = document.getElementById("sms-message");
+      const button = form.querySelector("button[type=submit]");
+      message.textContent = "Saving your consent…";
+      button.disabled = true;
+      try {
+        const response = await fetch("/api/sms/opt-in", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ phone: form.phone.value, smsConsent: form.smsConsent.checked, website: form.website.value }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "We could not save your consent.");
+        message.textContent = result.message || "Your text alert consent was recorded.";
+        form.reset();
+      } catch (error) {
+        message.textContent = error.message || "We could not save your consent. Please try again.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

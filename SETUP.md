@@ -61,10 +61,12 @@ The appointment columns come from `migrations/0002_calendar_appointments.sql`. T
 
 ## Optional owner text alerts
 
-The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages:
+The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS is disabled until Twilio settings are configured in Cloudflare Pages and the business owner submits explicit consent at `/sms-opt-in.html`. Consent is stored in D1; alerts are sent only to the phone number configured as `OWNER_NOTIFICATION_PHONE` and only after that number is recorded through the opt-in form.
 
 - `OWNER_NOTIFICATION_PHONE`: destination phone in E.164 format, such as `+15551234567`.
 - `TWILIO_ACCOUNT_SID` and `TWILIO_FROM_NUMBER`: Twilio account SID and SMS-capable Twilio number.
 - `TWILIO_AUTH_TOKEN`: encrypted Cloudflare Secret. Enter credentials directly in Cloudflare, never in chat or source control.
+
+The campaign registration references `/privacy.html`, `/terms.html`, and `/sms-opt-in.html`. The owner must submit the opt-in form directly after it is deployed. The form requires the configured owner phone number and an unchecked consent box; it records the consent timestamp and attempts to send the standard confirmation text. The confirmation and event alerts will not deliver until Twilio enables the A2P campaign. Twilio may still require account verification and campaign submission in its console.
 
 For U.S. recipients, Twilio currently lists outbound SMS at $0.0083 per message segment, plus carrier fees and number rental; A2P 10DLC registration fees can also apply. U.S. long-code business messaging requires a paid Twilio account, a number, and approved A2P 10DLC registration. Review [Twilio U.S. SMS pricing](https://www.twilio.com/en-us/sms/pricing/us) and [Twilio A2P 10DLC requirements](https://www.twilio.com/docs/messaging/compliance/a2p-10dlc/quickstart) before activating texts; pricing and fees may change.

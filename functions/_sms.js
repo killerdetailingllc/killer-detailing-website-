@@ -3,7 +3,16 @@ export async function sendOwnerSms(env, message) {
   const accountSid = String(env.TWILIO_ACCOUNT_SID || "").trim();
   const authToken = String(env.TWILIO_AUTH_TOKEN || "").trim();
   const from = String(env.TWILIO_FROM_NUMBER || "").trim();
-  const to = String(env.OWNER_NOTIFICATION_PHONE || "").trim();
+  if (!env.DB) return false;
+  await env.DB.prepare(`CREATE TABLE IF NOT EXISTS sms_owner_consents (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    phone TEXT NOT NULL,
+    consented_at TEXT NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    source TEXT NOT NULL DEFAULT 'web'
+  )`).run();
+  const consent = await env.DB.prepare("SELECT phone FROM sms_owner_consents WHERE id = 1 AND active = 1").first();
+  const to = String(consent?.phone || "").trim();
   if (!accountSid || !authToken || !from || !to) return false;
   if (!/^\+\d{8,15}$/.test(from) || !/^\+\d{8,15}$/.test(to)) return false;
   try {
