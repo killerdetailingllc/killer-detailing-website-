@@ -59,6 +59,12 @@ The owner sets the estimate and expected service duration in the estimate desk. 
 
 The appointment columns come from `migrations/0002_calendar_appointments.sql`. The slot-hold table is created automatically by the Pages Function when first needed. iCloud uses `APPLE_CALENDAR_EMAIL` (Apple Account sign-in email) and `APPLE_CALENDAR_APP_PASSWORD` (encrypted Cloudflare Secret); optional `APPLE_CALENDAR_NAME` chooses a calendar by its displayed name, otherwise the first calendar is used. Create the app-specific password from Apple Account settings and enter it directly in Cloudflare; never send it through chat or store it in GitHub. Apple requires two-factor authentication for app-specific passwords. See [Apple’s app-specific password instructions](https://support.apple.com/en-us/102654). A successful payment or cash confirmation still books the appointment if adding the iCloud event fails; the owner notification explains that the calendar entry needs attention.
 
+## Owner phone app
+
+The private owner desk at /admin is also an installable web app. It opens to a month calendar with confirmed and completed website bookings, contact details, service address, vehicle, services, estimate, and payment status. The existing request list and appointment actions remain available in the same app. Other iCloud events stay in Apple Calendar and continue to block customer booking times; they are not copied into this website calendar. On iPhone, open /admin in Safari and choose Share → Add to Home Screen. On Android, use Chrome’s Install app / Add to Home screen option. No app-store account or additional hosting service is required.
+
+The app uses the existing owner session. Its service worker caches only the public app shell and never caches /api/ responses, including private customer records. Live bookings require an internet connection.
+
 ## Optional owner text alerts
 
 The application can send short SMS alerts for a new estimate request, when a customer accepts, and when a cash or Stripe appointment is confirmed. Messages contain no customer contact or address details; sign in to `/admin` to review those securely. SMS remains disabled unless `TWILIO_SMS_ENABLED` is set to `true`, Twilio settings are configured in Cloudflare Pages, the A2P campaign is approved, and the business owner submits explicit consent at `/sms-opt-in.html`. Consent is stored in D1; alerts are sent only to the phone number configured as `OWNER_NOTIFICATION_PHONE` and only after that number is recorded through the opt-in form.

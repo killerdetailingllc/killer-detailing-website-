@@ -5,7 +5,20 @@ const loginMessage = document.getElementById("login-message");
 const deskMessage = document.getElementById("desk-message");
 const requestsRoot = document.getElementById("requests");
 const statusFilter = document.getElementById("status-filter");
+const calendarView = document.getElementById("calendar-view");
+const appointmentsView = document.getElementById("appointments-view");
+const calendarGrid = document.getElementById("calendar-grid");
+const calendarAgenda = document.getElementById("calendar-agenda");
+const calendarMessage = document.getElementById("calendar-message");
+const calendarMonthLabel = document.getElementById("calendar-month");
+const installButton = document.getElementById("install-app");
 let allRequests = [];
+let recentRequests = [];
+let calendarAppointments = [];
+const easternToday = easternDateKey(new Date());
+let calendarMonth = new Date(Number(easternToday.slice(0, 4)), Number(easternToday.slice(5, 7)) - 1, 1);
+let selectedCalendarDate = easternToday;
+let installPrompt = null;
 const statusNames = { pending: "New request", estimate_sent: "Waiting for customer", accepted: "Accepted — choosing time", booked: "Confirmed", completed: "Completed", cancelled: "Cancelled", declined: "Declined" };
 const escapeText = (value) => String(value ?? "");
 const displayServiceNames = (services) => services.map((service) => ({ "Exterior Detail": "Burial", "Interior Detail": "Embalming", "Full Detail": "Viewing" })[service] || service);
@@ -136,6 +149,7 @@ async function runAction(item, action, extra, feedback, button) {
   try {
     const result = await api("/api/admin/appointment", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ id: item.id, action, ...extra }) });
     await loadRequests();
+    await loadCalendar();
     deskMessage.textContent = result.message || "Appointment updated.";
   } catch (error) { feedback.textContent = error.message; button.disabled = false; }
 }
@@ -144,7 +158,8 @@ async function loadRequests() {
   deskMessage.textContent = "Loading estimate requests…";
   try {
     const result = await api("/api/admin/requests");
-    allRequests = result.requests;
+    recentRequests = result.requests;
+    allRequests = mergeRequests(recentRequests, calendarAppointments);
     renderRequests();
     deskMessage.textContent = "";
   } catch (error) {
@@ -161,7 +176,150 @@ function renderRequests() {
   else for (const item of filtered) requestsRoot.append(renderRequest(item));
 }
 
+function dateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return year + "-" + month + "-" + day;
+}
+
+function easternDateKey(value) {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(new Date(value)).map((part) => [part.type, part.value]));
+  return parts.year + "-" + parts.month + "-" + parts.day;
+}
+
+function calendarMonthKey(date = calendarMonth) {
+  return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0");
+}
+
+function mergeRequests(...groups) {
+  const byId = new Map();
+  for (const item of groups.flat()) byId.set(item.id, item);
+  return [...byId.values()].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+function appointmentTime(value) {
+  return new Date(value).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+}
+
+function appointmentStatus(item) {
+  return statusNames[item.status] || String(item.status || "").replaceAll("_", " ");
+}
+
+function setActiveView(view) {
+  const showCalendar = view === "calendar";
+  calendarView.hidden = !showCalendar;
+  appointmentsView.hidden = showCalendar;
+  document.querySelectorAll(".admin-views [data-view]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.view === view)));
+}
+
+async function loadCalendar() {
+  calendarMessage.textContent = "Loading appointments…";
+  try {
+    const result = await api("/api/admin/calendar?month=" + encodeURIComponent(calendarMonthKey()));
+    calendarAppointments = result.appointments;
+    allRequests = mergeRequests(recentRequests, calendarAppointments);
+    renderRequests();
+    renderCalendar();
+    calendarMessage.textContent = "";
+  } catch (error) {
+    calendarMessage.textContent = error.message;
+    if (error.message.includes("sign in")) { desk.hidden = true; loginPanel.hidden = false; }
+  }
+}
+
+function renderCalendar() {
+  const displayDate = new Date(Date.UTC(calendarMonth.getFullYear(), calendarMonth.getMonth(), 15, 12));
+  calendarMonthLabel.textContent = displayDate.toLocaleDateString("en-US", { timeZone: "America/New_York", month: "long", year: "numeric" });
+  calendarGrid.replaceChildren();
+  const firstDay = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1).getDay();
+  const cursor = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), 1 - firstDay);
+  for (let i = 0; i < 42; i++) {
+    const date = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + i);
+    const key = dateKey(date);
+    const appointments = calendarAppointments.filter((item) => easternDateKey(item.appointment_at) === key);
+    const outsideMonth = date.getMonth() !== calendarMonth.getMonth() || date.getFullYear() !== calendarMonth.getFullYear();
+    const cell = node("button", undefined, "calendar-day" + (outsideMonth ? " is-outside-month" : "") + (key === selectedCalendarDate ? " is-selected" : ""));
+    cell.type = "button";
+    cell.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) + ", " + appointments.length + " appointment" + (appointments.length === 1 ? "" : "s"));
+    cell.append(node("span", date.getDate(), "calendar-day-number"));
+    if (appointments.length) {
+      cell.append(node("span", appointments.length + " job" + (appointments.length === 1 ? "" : "s"), "calendar-day-count"));
+      const labels = node("span", undefined, "calendar-day-events");
+      for (const item of appointments.slice(0, 2)) labels.append(node("span", appointmentTime(item.appointment_at) + " " + item.name, "calendar-day-event"));
+      cell.append(labels);
+    }
+    cell.addEventListener("click", () => {
+      if (outsideMonth) {
+        calendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        selectedCalendarDate = key;
+        loadCalendar();
+        return;
+      }
+      selectedCalendarDate = key;
+      renderCalendar();
+    });
+    calendarGrid.append(cell);
+  }
+  renderCalendarAgenda();
+}
+
+function renderCalendarAgenda() {
+  calendarAgenda.replaceChildren();
+  const selectedDate = new Date(selectedCalendarDate + "T12:00:00Z");
+  calendarAgenda.append(node("h3", "Appointments for " + selectedDate.toLocaleDateString("en-US", { timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric" })));
+  const appointments = calendarAppointments.filter((item) => easternDateKey(item.appointment_at) === selectedCalendarDate).sort((a, b) => new Date(a.appointment_at) - new Date(b.appointment_at));
+  if (!appointments.length) {
+    calendarAgenda.append(node("p", "No confirmed jobs on this day.", "calendar-empty"));
+    return;
+  }
+  for (const item of appointments) {
+    const event = node("article", undefined, "calendar-event");
+    const head = node("div", undefined, "calendar-event-head");
+    const info = node("div");
+    info.append(node("p", appointmentTime(item.appointment_at) + " · " + (item.appointment_duration_minutes / 60) + " hour" + (item.appointment_duration_minutes === 60 ? "" : "s"), "calendar-event-time"));
+    info.append(node("h4", item.name));
+    head.append(info, node("span", appointmentStatus(item), "eyebrow"));
+    event.append(head);
+    event.append(node("p", item.year + " " + item.make + " " + item.model + " · " + item.vehicle_type));
+    const serviceNames = displayServiceNames(item.services).concat(item.addons.map((addon) => "Add-on: " + addon));
+    event.append(node("p", "Services: " + serviceNames.join(", ")));
+    const contact = node("p");
+    const phone = node("a", item.phone); phone.href = "tel:" + item.phone;
+    const email = node("a", item.email); email.href = "mailto:" + item.email;
+    contact.append(phone, document.createTextNode(" · "), email);
+    event.append(contact);
+    event.append(node("p", "Address: " + (item.service_address || "Not provided")));
+    event.append(node("p", item.payment_method === "stripe"
+      ? "Online deposit paid: " + money(item.deposit_cents) + " · Estimate: " + money(item.estimate_cents)
+      : "Cash booking · No deposit · " + money(item.estimate_cents) + " due at appointment"));
+    const manage = node("details", undefined, "calendar-manage");
+    manage.append(node("summary", "View details and manage appointment"));
+    manage.append(renderRequest(item));
+    event.append(manage);
+    calendarAgenda.append(event);
+  }
+}
+
 statusFilter.addEventListener("change", renderRequests);
+document.querySelectorAll(".admin-views [data-view]").forEach((button) => button.addEventListener("click", () => setActiveView(button.dataset.view)));
+document.getElementById("calendar-prev").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); selectedCalendarDate = dateKey(calendarMonth); loadCalendar(); });
+document.getElementById("calendar-next").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); selectedCalendarDate = dateKey(calendarMonth); loadCalendar(); });
+document.getElementById("calendar-today").addEventListener("click", () => { const today = easternDateKey(new Date()); calendarMonth = new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, 1); selectedCalendarDate = today; loadCalendar(); });
+
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  installButton.hidden = false;
+});
+installButton.addEventListener("click", async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  await installPrompt.userChoice;
+  installPrompt = null;
+  installButton.hidden = true;
+});
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/service-worker.js", { scope: "/" }).catch(() => {});
 
 loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -169,7 +327,7 @@ loginForm.addEventListener("submit", async (event) => {
   try {
     await api("/api/admin/login", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ password: document.getElementById("owner-password").value }) });
     document.getElementById("owner-password").value = "";
-    loginPanel.hidden = true; desk.hidden = false; await loadRequests();
+    loginPanel.hidden = true; desk.hidden = false; await loadRequests(); await loadCalendar();
   } catch (error) { loginMessage.textContent = error.message; }
 });
 
