@@ -1,8 +1,8 @@
-const CACHE_NAME = "killer-owner-app-v1";
+const CACHE_NAME = "killer-owner-app-v2";
 const APP_SHELL = [
   "/admin.html",
   "/style.css",
-  "/admin.js?v=20261107-owner-app",
+  "/admin.js?v=20261108-event-jump",
   "/manifest.webmanifest",
   "/app-icon.svg",
   "/app-icon-180.png",

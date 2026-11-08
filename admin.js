@@ -18,6 +18,7 @@ let calendarAppointments = [];
 const easternToday = easternDateKey(new Date());
 let calendarMonth = new Date(Number(easternToday.slice(0, 4)), Number(easternToday.slice(5, 7)) - 1, 1);
 let selectedCalendarDate = easternToday;
+let selectedCalendarAppointmentId = null;
 let installPrompt = null;
 const statusNames = { pending: "New request", estimate_sent: "Waiting for customer", accepted: "Accepted — choosing time", booked: "Confirmed", completed: "Completed", cancelled: "Cancelled", declined: "Declined" };
 const escapeText = (value) => String(value ?? "");
@@ -218,6 +219,7 @@ async function loadCalendar() {
   try {
     const result = await api("/api/admin/calendar?month=" + encodeURIComponent(calendarMonthKey()));
     calendarAppointments = result.appointments;
+    if (selectedCalendarAppointmentId && !calendarAppointments.some((item) => item.id === selectedCalendarAppointmentId)) selectedCalendarAppointmentId = null;
     allRequests = mergeRequests(recentRequests, calendarAppointments);
     renderRequests();
     renderCalendar();
@@ -239,29 +241,61 @@ function renderCalendar() {
     const key = dateKey(date);
     const appointments = calendarAppointments.filter((item) => easternDateKey(item.appointment_at) === key);
     const outsideMonth = date.getMonth() !== calendarMonth.getMonth() || date.getFullYear() !== calendarMonth.getFullYear();
-    const cell = node("button", undefined, "calendar-day" + (outsideMonth ? " is-outside-month" : "") + (key === selectedCalendarDate ? " is-selected" : ""));
-    cell.type = "button";
-    cell.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) + ", " + appointments.length + " appointment" + (appointments.length === 1 ? "" : "s"));
-    cell.append(node("span", date.getDate(), "calendar-day-number"));
+    const cell = node("div", undefined, "calendar-day" + (outsideMonth ? " is-outside-month" : "") + (key === selectedCalendarDate ? " is-selected" : ""));
+    const dateButton = node("button", undefined, "calendar-date-button");
+    dateButton.type = "button";
+    dateButton.setAttribute("aria-label", date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }) + ", " + appointments.length + " appointment" + (appointments.length === 1 ? "" : "s"));
+    dateButton.append(node("span", date.getDate(), "calendar-day-number"));
     if (appointments.length) {
-      cell.append(node("span", appointments.length + " job" + (appointments.length === 1 ? "" : "s"), "calendar-day-count"));
-      const labels = node("span", undefined, "calendar-day-events");
-      for (const item of appointments.slice(0, 2)) labels.append(node("span", appointmentTime(item.appointment_at) + " " + item.name, "calendar-day-event"));
+      dateButton.append(node("span", appointments.length + " job" + (appointments.length === 1 ? "" : "s"), "calendar-day-count"));
+    }
+    dateButton.addEventListener("click", () => selectCalendarDate(key, outsideMonth));
+    cell.append(dateButton);
+    if (appointments.length) {
+      const labels = node("div", undefined, "calendar-day-events");
+      for (const item of appointments.slice(0, 2)) {
+        const eventButton = node("button", appointmentTime(item.appointment_at) + " " + item.name, "calendar-day-event");
+        eventButton.type = "button";
+        eventButton.title = appointmentTime(item.appointment_at) + " · " + item.name + " · " + (item.service_address || "No address saved");
+        eventButton.setAttribute("aria-label", "Open " + item.name + " appointment details");
+        eventButton.addEventListener("click", () => selectCalendarDate(key, outsideMonth, item.id));
+        labels.append(eventButton);
+      }
       cell.append(labels);
     }
-    cell.addEventListener("click", () => {
-      if (outsideMonth) {
-        calendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-        selectedCalendarDate = key;
-        loadCalendar();
-        return;
-      }
-      selectedCalendarDate = key;
-      renderCalendar();
-    });
     calendarGrid.append(cell);
   }
   renderCalendarAgenda();
+}
+
+function selectCalendarDate(key, outsideMonth, appointmentId = null) {
+  selectedCalendarDate = key;
+  selectedCalendarAppointmentId = appointmentId;
+  if (outsideMonth) {
+    calendarMonth = new Date(Number(key.slice(0, 4)), Number(key.slice(5, 7)) - 1, 1);
+    loadCalendar().then(() => {
+      const dayAppointments = calendarAppointments.filter((item) => easternDateKey(item.appointment_at) === selectedCalendarDate);
+      if (!selectedCalendarAppointmentId && dayAppointments.length) selectedCalendarAppointmentId = dayAppointments[0].id;
+      renderCalendar();
+      scrollToCalendarDetails(selectedCalendarAppointmentId);
+    });
+    return;
+  }
+  const dayAppointments = calendarAppointments.filter((item) => easternDateKey(item.appointment_at) === selectedCalendarDate);
+  if (!selectedCalendarAppointmentId && dayAppointments.length) selectedCalendarAppointmentId = dayAppointments[0].id;
+  renderCalendar();
+  scrollToCalendarDetails(selectedCalendarAppointmentId);
+}
+
+function scrollToCalendarDetails(appointmentId) {
+  window.requestAnimationFrame(() => {
+    const event = appointmentId ? document.getElementById("calendar-event-" + appointmentId) : null;
+    if (event) {
+      const manage = event.querySelector(".calendar-manage");
+      if (manage) manage.open = true;
+      event.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else calendarAgenda.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 }
 
 function renderCalendarAgenda() {
@@ -275,6 +309,7 @@ function renderCalendarAgenda() {
   }
   for (const item of appointments) {
     const event = node("article", undefined, "calendar-event");
+    event.id = "calendar-event-" + item.id;
     const head = node("div", undefined, "calendar-event-head");
     const info = node("div");
     info.append(node("p", appointmentTime(item.appointment_at) + " · " + (item.appointment_duration_minutes / 60) + " hour" + (item.appointment_duration_minutes === 60 ? "" : "s"), "calendar-event-time"));
@@ -294,6 +329,7 @@ function renderCalendarAgenda() {
       ? "Online deposit paid: " + money(item.deposit_cents) + " · Estimate: " + money(item.estimate_cents)
       : "Cash booking · No deposit · " + money(item.estimate_cents) + " due at appointment"));
     const manage = node("details", undefined, "calendar-manage");
+    if (item.id === selectedCalendarAppointmentId) manage.open = true;
     manage.append(node("summary", "View details and manage appointment"));
     manage.append(renderRequest(item));
     event.append(manage);
@@ -303,9 +339,9 @@ function renderCalendarAgenda() {
 
 statusFilter.addEventListener("change", renderRequests);
 document.querySelectorAll(".admin-views [data-view]").forEach((button) => button.addEventListener("click", () => setActiveView(button.dataset.view)));
-document.getElementById("calendar-prev").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); selectedCalendarDate = dateKey(calendarMonth); loadCalendar(); });
-document.getElementById("calendar-next").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); selectedCalendarDate = dateKey(calendarMonth); loadCalendar(); });
-document.getElementById("calendar-today").addEventListener("click", () => { const today = easternDateKey(new Date()); calendarMonth = new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, 1); selectedCalendarDate = today; loadCalendar(); });
+document.getElementById("calendar-prev").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1); selectedCalendarDate = dateKey(calendarMonth); selectedCalendarAppointmentId = null; loadCalendar(); });
+document.getElementById("calendar-next").addEventListener("click", () => { calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 1, 1); selectedCalendarDate = dateKey(calendarMonth); selectedCalendarAppointmentId = null; loadCalendar(); });
+document.getElementById("calendar-today").addEventListener("click", () => { const today = easternDateKey(new Date()); calendarMonth = new Date(Number(today.slice(0, 4)), Number(today.slice(5, 7)) - 1, 1); selectedCalendarDate = today; selectedCalendarAppointmentId = null; loadCalendar(); });
 
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();

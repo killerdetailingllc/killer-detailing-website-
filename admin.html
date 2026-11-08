@@ -18,6 +18,15 @@
     @media(max-width:700px){.admin-wrap{padding:24px 14px}.admin-head{align-items:flex-start}.admin-head-actions{flex-direction:column-reverse;align-items:stretch}.calendar-panel{padding:12px}.calendar-day{min-height:64px;padding:5px;align-items:center}.calendar-day-events{display:none}.calendar-day-count{font-size:.62rem}.calendar-weekday{font-size:.68rem}.calendar-controls{width:100%;justify-content:space-between}.calendar-controls strong{min-width:0}.calendar-toolbar h2{font-size:1.4rem}}
     @media(max-width:600px){.admin-form{grid-template-columns:1fr}.admin-form textarea,.admin-form button{grid-column:auto}.admin-head h1{font-size:1.8rem!important}.logout{padding:9px 10px;font-size:.8rem}.calendar-grid,.calendar-weekdays{gap:3px}.calendar-day{min-height:56px}.calendar-day-count{font-size:.58rem}.calendar-event{padding:12px}}
   </style>
+  <style>
+    .calendar-day{align-items:stretch;cursor:default}
+    .calendar-date-button{display:flex;align-items:center;justify-content:space-between;gap:4px;width:100%;padding:0;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+    .calendar-day-event{width:100%;padding:3px 5px;border:0;border-radius:3px;background:#1a1a1a;color:#eee;text-align:left;cursor:pointer}
+    .calendar-day-event:hover,.calendar-day-event:focus-visible{background:#351316;color:#fff}
+    .calendar-day-event:focus-visible,.calendar-date-button:focus-visible{outline:2px solid #ff777d;outline-offset:2px}
+    .calendar-event{scroll-margin-top:90px}
+    @media(max-width:700px){.calendar-day{align-items:stretch}.calendar-date-button{flex-direction:column;justify-content:center}.calendar-day-events{display:none}}
+  </style>
 </head>
 <body>
   <header class="site-header"><div class="wrap nav"><a class="brand" href="/">KILLER <span>DETAILING</span></a><nav aria-label="Owner navigation"><a href="/">Public site</a><a href="/sms-opt-in.html">Set up owner text alerts</a></nav></div></header>
@@ -61,6 +70,6 @@
       <p class="owner-app-footer">This private app requires an internet connection to load live bookings. <a href="/">Open public website</a></p>
     </section>
   </main>
-  <script src="admin.js?v=20261107-owner-app"></script>
+  <script src="admin.js?v=20261108-event-jump"></script>
 </body>
 </html>
