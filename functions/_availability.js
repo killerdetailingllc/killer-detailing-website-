@@ -26,11 +26,11 @@ export function buildBusinessSlots(date, durationMinutes, now = Date.now()) {
   const dateCheck = new Date(`${date}T12:00:00Z`);
   if (!Number.isFinite(dateCheck.getTime()) || dateCheck.toISOString().slice(0, 10) !== date) return [];
   const day = dateCheck.getUTCDay();
-  const openHour = day === 0 || day === 6 ? 10 : 18;
+  const openingMinute = day === 0 || day === 6 ? 10 * 60 : 17 * 60 + 30;
   const closeHour = 23;
   const durationMs = Number(durationMinutes) * 60000;
   const slots = [];
-  for (let minute = openHour * 60; minute + Number(durationMinutes) <= closeHour * 60; minute += SLOT_MINUTES) {
+  for (let minute = openingMinute; minute + Number(durationMinutes) <= closeHour * 60; minute += SLOT_MINUTES) {
     const start = zonedDateTimeToUtc(date, Math.floor(minute / 60), minute % 60);
     const end = new Date(start.getTime() + durationMs);
     if (start.getTime() <= now) continue;
