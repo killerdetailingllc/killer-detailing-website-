@@ -23,6 +23,18 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
 @media(max-width:650px){.wrap{width:calc(100% - 36px)}.header-inner{min-height:65px;gap:.7rem}.brand img{width:38px}.brand-words strong{font-size:1.57rem}.brand-words>span{font-size:.61rem;letter-spacing:2.4px}.main-nav{display:none}.phone-link{font-size:.83rem;padding:8px 10px}.hero-content{padding-top:33px;padding-bottom:clamp(164px,37vw,235px)}.hero h1{font-size:clamp(3.55rem,12.6vw,5.55rem);margin:14px 0 12px}.hero-content p{max-width:370px;font-size:1rem;line-height:1.45}.hero .primary{margin-top:16px}.hero-photo{top:auto;left:0;height:48%;background-size:cover;background-position:70% 56%}.hero-shade{background:linear-gradient(180deg,#101113 0%,#101113 51%,rgba(16,17,19,.8) 58%,transparent 77%)}.eyebrow{font-size:.75rem;letter-spacing:1.6px}.estimate{padding-block:29px 35px}.section-meta{margin-bottom:10px}h2{font-size:2.05rem}.conditions{grid-template-columns:1fr;gap:9px;margin-top:16px}.condition{position:relative;display:grid;grid-template-columns:45px 1fr;column-gap:12px;padding:14px 39px 14px 15px}.card-top{grid-column:1;grid-row:1/3;align-items:center;margin:0}.radio-dot{position:absolute;right:14px;top:calc(50% - 8px)}.condition strong,.explain{grid-column:2}.condition strong{font-size:1.35rem}.explain{margin-top:2px}.gauge{width:35px}.split,.process-grid,.footer-grid,.form-grid{grid-template-columns:1fr}.split{gap:24px}.submit-row{align-items:flex-start;flex-direction:column;gap:9px}.process-grid{gap:20px}.footer-grid{gap:26px}.hours{grid-template-columns:70px 1fr}.section-copy{max-width:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
 
+.request-section{border:0;padding:0;margin:1.6rem 0 0;min-width:0;max-width:900px}
+.request-section legend{padding:0;margin:0 0 .7rem;font-size:1.22rem;font-weight:700}
+.schedule-help,.schedule-status{color:var(--gray);line-height:1.5;font-size:.96rem}
+.schedule-help{margin:0 0 .9rem}
+.schedule-status:not(:empty){margin:.5rem 0}
+.wide-field{grid-column:1/-1}
+.state-zip{display:grid;grid-template-columns:minmax(70px,1fr) 2fr;gap:16px}
+.flexible-time{display:flex;align-items:center;gap:.55rem;min-height:44px;width:fit-content;font-size:1rem;cursor:pointer}
+.flexible-time input{width:18px;height:18px;accent-color:#a52424}
+.form-grid input,.form-grid select{min-width:0}
+.form-grid :disabled{background-color:#efefef;color:#595959}
+
 </style>
   
 </head>
@@ -73,7 +85,6 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
           <form id="estimate-form">
             <div class="form-grid">
               <label>Vehicle<input id="vehicle" required maxlength="100" placeholder="e.g. 2018 Toyota Camry" autocomplete="off"></label>
-              <label>Service area<input id="area" required maxlength="90" placeholder="Your city or ZIP code" autocomplete="address-level2"></label>
               <label>Package<select id="service">
                   <option>Help me choose</option>
                     <option>Burial – Outside</option>
@@ -84,8 +95,31 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
                     <option>Exhumation</option>
                   </optgroup>
                 </select></label>
-              <label>Anything to focus on? <span class="optional">(optional)</span><input id="notes" maxlength="300" placeholder="e.g. Pet hair on the back seat"></label>
+              <label class="wide-field">Anything to focus on? <span class="optional">(optional)</span><input id="notes" maxlength="300" placeholder="e.g. Pet hair on the back seat"></label>
             </div>
+            <fieldset class="request-section">
+              <legend>Where will the vehicle be?</legend>
+              <div class="form-grid">
+                <label>Street address<input id="street" required maxlength="150" autocomplete="address-line1" placeholder="House number and street"></label>
+                <label>Apartment, suite, or unit <span class="optional">(optional)</span><input id="unit" maxlength="40" autocomplete="address-line2"></label>
+                <label>City<input id="city" required maxlength="80" autocomplete="address-level2"></label>
+                <div class="state-zip">
+                  <label>State<input id="state" required maxlength="2" minlength="2" pattern="[A-Za-z]{2}" title="Enter the two-letter state abbreviation" value="FL" autocomplete="address-level1"></label>
+                  <label>ZIP code<input id="zip" required maxlength="10" pattern="[0-9]{5}(-[0-9]{4})?" title="Enter a five-digit ZIP code or ZIP+4" autocomplete="postal-code" inputmode="numeric"></label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset class="request-section">
+              <legend>When would you like us to come?</legend>
+              <p class="schedule-help">Choose a start time in Eastern time. We’ll confirm the time and length of the visit when you approve the estimate.</p>
+              <div class="form-grid">
+                <label>Preferred day<input id="visit-day" type="date" required></label>
+                <label>Available start time<select id="visit-time" required disabled><option value="">Choose a day first</option></select></label>
+              </div>
+              <p id="schedule-status" class="schedule-status" role="status"></p>
+              <button id="retry-times" type="button" class="text-action" hidden>Check times again</button>
+              <label class="flexible-time"><input id="flexible-time" type="checkbox"> Arrange a time with me by text</label>
+            </fieldset>
             <div class="submit-row"><button type="submit" class="button primary"><svg class="icon"><use href="#message"/></svg>Open text message</button><p>Your request opens in your texting app.<br>Tap send there to reach Killer Detailing.</p></div>
             <details class="copy-panel"><summary>Sending from a computer?</summary><p>Copy your request and text it to <a href="tel:+18508432598">850-843-2598</a>.</p><button type="button" id="copy-request" class="button outline">Copy request</button><textarea id="message-preview" aria-label="Estimate request to copy" rows="5" readonly hidden></textarea></details>
             <p id="form-status" role="status" aria-live="polite"></p>
@@ -104,9 +138,9 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
       </div>
     </section>
     <section class="process" id="process" aria-labelledby="process-title"><div class="wrap"><div class="eyebrow"><i></i>How it works</div><h2 id="process-title">From estimate to appointment.</h2><div class="process-grid">
-      <article><svg class="icon"><use href="#message"/></svg><h3>Text your request</h3><p>Choose the condition, add your vehicle details, and send the prepared text.</p></article>
+      <article><svg class="icon"><use href="#message"/></svg><h3>Text your request</h3><p>Add your vehicle and service address, pick a time, and send your estimate request.</p></article>
       <article><svg class="icon"><use href="#check"/></svg><h3>Approve your estimate</h3><p>We’ll text you the scope and price so you can decide if you’d like to book.</p></article>
-      <article><svg class="icon"><use href="#clock"/></svg><h3>Schedule by text</h3><p>Once you approve the estimate, we’ll agree on a time and confirm your appointment by text.</p></article>
+      <article><svg class="icon"><use href="#clock"/></svg><h3>Confirm your appointment</h3><p>Once you approve the estimate, we’ll text you to confirm your appointment.</p></article>
     </div></div></section>
   </main>
   <footer id="contact"><div class="wrap footer-grid"><div><div class="eyebrow on-dark"><i></i>Contact</div><h2>Killer Detailing</h2><p><svg class="icon"><use href="#pin"/></svg>Mobile service · Perry, Florida</p></div><div><h3>Call or text</h3><a class="footer-phone" href="tel:+18508432598">850-843-2598</a><a class="footer-text" href="sms:+18508432598">Send a text message</a></div><div><h3>Detailing hours</h3><dl class="hours"><dt>Mon–Fri</dt><dd>5:30 pm – 11 pm</dd><dt>Sat–Sun</dt><dd>10 am – 11 pm</dd></dl></div></div></footer>
@@ -120,6 +154,74 @@ const levelButtons = [...document.querySelectorAll("[data-level]")];
 const statusMessage = document.getElementById("form-status");
 const preview = document.getElementById("message-preview");
 let condition = "";
+const dayField = document.getElementById("visit-day");
+const timeField = document.getElementById("visit-time");
+const flexible = document.getElementById("flexible-time");
+const scheduleStatus = document.getElementById("schedule-status");
+const retryTimes = document.getElementById("retry-times");
+const zone = "America/New_York";
+const easternDate = new Intl.DateTimeFormat("en-CA", {timeZone:zone, year:"numeric", month:"2-digit", day:"2-digit"});
+const easternTime = new Intl.DateTimeFormat("en-US", {timeZone:zone, hour:"numeric", minute:"2-digit"});
+const appointmentLabel = new Intl.DateTimeFormat("en-US", {
+  timeZone:zone, weekday:"short", month:"short", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit",
+});
+let calendarVersion = 0;
+let checkedAt = 0;
+
+function setDateRange() {
+  const today = easternDate.format(new Date());
+  const last = new Date(today + "T12:00:00Z");
+  last.setUTCDate(last.getUTCDate() + 60);
+  dayField.min = today;
+  dayField.max = last.toISOString().slice(0,10);
+}
+
+async function loadTimes(previous = "") {
+  const version = ++calendarVersion;
+  const date = dayField.value;
+  checkedAt = 0;
+  retryTimes.hidden = true;
+  scheduleStatus.textContent = "";
+  timeField.disabled = true;
+  timeField.replaceChildren(new Option("Choose a day first", ""));
+  if (flexible.checked || !date || !dayField.validity.valid) return;
+  timeField.replaceChildren(new Option("Checking times…", ""));
+  scheduleStatus.textContent = "Checking the booking calendar…";
+  try {
+    const response = await fetch("/request-times?date=" + encodeURIComponent(date), {cache:"no-store"});
+    if (!response.ok) throw new Error("Calendar unavailable");
+    const data = await response.json();
+    if (version !== calendarVersion) return;
+    if (data.date !== date || !Array.isArray(data.times)) throw new Error("Invalid calendar response");
+    const times = data.times.filter(start => Date.parse(start) > Date.now());
+    checkedAt = Date.now();
+    timeField.replaceChildren(new Option(times.length ? "Choose a start time" : "No openings", ""));
+    for (const start of times) timeField.add(new Option(easternTime.format(new Date(start)), start));
+    timeField.disabled = !times.length;
+    if (previous && times.includes(previous)) timeField.value = previous;
+    scheduleStatus.textContent = !times.length ? "No openings for this day. Try another day or arrange a time by text." :
+      previous && !timeField.value ? "That time is no longer available. Choose another start time." :
+      times.length + (times.length === 1 ? " start time available." : " start times available.");
+  } catch {
+    if (version !== calendarVersion) return;
+    timeField.replaceChildren(new Option("Times unavailable", ""));
+    scheduleStatus.textContent = "We couldn’t check the calendar. Try again or arrange a time by text.";
+    retryTimes.hidden = false;
+  }
+}
+
+setDateRange();
+dayField.addEventListener("change", () => loadTimes());
+retryTimes.addEventListener("click", () => loadTimes());
+flexible.addEventListener("change", () => {
+  dayField.disabled = flexible.checked;
+  loadTimes();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  setDateRange();
+  if (!detailsStep.hidden && dayField.value && !flexible.checked) loadTimes(timeField.value);
+});
 
 function showStep(showDetails) {
   firstStep.hidden = showDetails;
@@ -160,7 +262,8 @@ function requestText() {
     "Hi Killer Detailing! I’d like an estimate.",
     "Vehicle: " + value("vehicle"),
     "Condition: " + condition,
-    "Location: " + value("area"),
+    "Service address: " + [value("street"), value("unit"), value("city"), value("state").toUpperCase() + " " + value("zip")].filter(Boolean).join(", "),
+    "Requested appointment: " + (flexible.checked ? "Arrange by text" : appointmentLabel.format(new Date(timeField.value)) + " Eastern"),
     "Package: " + value("service")
   ];
   if (value("notes")) lines.push("Focus areas: " + value("notes"));
@@ -168,11 +271,23 @@ function requestText() {
 }
 
 function validateRequest() {
-  for (const id of ["vehicle", "area"]) {
+  for (const id of ["vehicle", "street", "city", "state", "zip"]) {
     const input = document.getElementById(id);
     input.setCustomValidity(input.value.trim() ? "" : "Please fill in this field.");
   }
-  return form.reportValidity();
+  setDateRange();
+  if (!form.reportValidity()) return false;
+  if (!flexible.checked && (!timeField.value || timeField.disabled)) {
+    statusMessage.textContent = "Choose an available day and time or select “Arrange a time with me by text.”";
+    dayField.focus();
+    return false;
+  }
+  if (!flexible.checked && (Date.now() - checkedAt > 60000 || Date.parse(timeField.value) <= Date.now())) {
+    loadTimes(timeField.value);
+    statusMessage.textContent = "Refreshing your start time. Review it, then try again.";
+    return false;
+  }
+  return true;
 }
 
 form.addEventListener("input", event => {
