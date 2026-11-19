@@ -84,6 +84,7 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
           <div class="selection-line"><span>Vehicle condition <strong id="chosen-condition"></strong></span><button id="change-condition" type="button" class="text-action">Change</button></div>
           <form id="estimate-form">
             <div class="form-grid">
+              <label>Customer name<input id="customer-name" autocomplete="name" required maxlength="140"></label>
               <label>Vehicle<input id="vehicle" required maxlength="100" placeholder="e.g. 2018 Toyota Camry" autocomplete="off"></label>
               <label>Package<select id="service">
                   <option>Help me choose</option>
@@ -260,6 +261,7 @@ function requestText() {
   const value = id => document.getElementById(id).value.trim();
   const lines = [
     "Hi Killer Detailing! I’d like an estimate.",
+    "Customer name: " + value("customer-name"),
     "Vehicle: " + value("vehicle"),
     "Condition: " + condition,
     "Service address: " + [value("street"), value("unit"), value("city"), value("state").toUpperCase() + " " + value("zip")].filter(Boolean).join(", "),
@@ -271,7 +273,7 @@ function requestText() {
 }
 
 function validateRequest() {
-  for (const id of ["vehicle", "street", "city", "state", "zip"]) {
+  for (const id of ["customer-name", "vehicle", "street", "city", "state", "zip"]) {
     const input = document.getElementById(id);
     input.setCustomValidity(input.value.trim() ? "" : "Please fill in this field.");
   }
