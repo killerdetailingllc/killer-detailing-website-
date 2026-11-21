@@ -32,7 +32,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
 
   const services = form.getAll("services").map(String);
   const addons = form.getAll("addons").map(String);
-  const allowedServices = serviceNames();
+  const allowedServices = [...serviceNames(), "Help me choose", "Resurrection", "Exhumation"];
   const allowedAddons = addonNames();
   const fields = Object.fromEntries(["name", "email", "phone", "year", "make", "model", "vehicleType", "condition"].map((key) => [key, String(form.get(key) || "").trim()]));
   fields.serviceAddress = String(form.get("serviceAddress") || "").trim();
