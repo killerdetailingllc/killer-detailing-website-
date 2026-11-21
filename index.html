@@ -82,10 +82,15 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
         <div id="details-step" hidden>
           <h2 id="vehicle-title" tabindex="-1">Tell us about your vehicle.</h2>
           <div class="selection-line"><span>Vehicle condition <strong id="chosen-condition"></strong></span><button id="change-condition" type="button" class="text-action">Change</button></div>
-          <form id="estimate-form">
+          <form id="estimate-form"><label hidden>Website<input id="website" tabindex="-1" autocomplete="off"></label>
             <div class="form-grid">
               <label>Customer name<input id="customer-name" autocomplete="name" required maxlength="140"></label>
-              <label>Vehicle<input id="vehicle" required maxlength="100" placeholder="e.g. 2018 Toyota Camry" autocomplete="off"></label>
+              <label>Email<input id="email" type="email" required maxlength="254" autocomplete="email"></label>
+              <label>Phone<input id="phone" type="tel" required maxlength="40" autocomplete="tel"></label>
+              <label>Vehicle year<input id="year" required pattern="[0-9]{4}" maxlength="4" inputmode="numeric"></label>
+              <label>Make<input id="make" required maxlength="80"></label>
+              <label>Model<input id="model" required maxlength="80"></label>
+              <label>Vehicle type<select id="vehicle-type" required><option value="">Choose a type</option><option>Car</option><option>SUV</option><option>Truck</option><option>Van</option><option>Other</option></select></label>
               <label>Package<select id="service">
                   <option>Help me choose</option>
                     <option>Burial – Outside</option>
@@ -121,7 +126,7 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
               <button id="retry-times" type="button" class="text-action" hidden>Check times again</button>
               <label class="flexible-time"><input id="flexible-time" type="checkbox"> Arrange a time with me by text</label>
             </fieldset>
-            <div class="submit-row"><button type="submit" class="button primary"><svg class="icon"><use href="#message"/></svg>Open text message</button><p>Your request opens in your texting app.<br>Tap send there to reach Killer Detailing.</p></div>
+            <div class="submit-row"><button type="submit" class="button primary"><svg class="icon"><use href="#message"/></svg>Send estimate request</button><p>We’ll review your request and contact you with an estimate.</p></div>
             <details class="copy-panel"><summary>Sending from a computer?</summary><p>Copy your request and text it to <a href="tel:+18508432598">850-843-2598</a>.</p><button type="button" id="copy-request" class="button outline">Copy request</button><textarea id="message-preview" aria-label="Estimate request to copy" rows="5" readonly hidden></textarea></details>
             <p id="form-status" role="status" aria-live="polite"></p>
           </form>
@@ -147,7 +152,6 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
   <footer id="contact"><div class="wrap footer-grid"><div><div class="eyebrow on-dark"><i></i>Contact</div><h2>Killer Detailing</h2><p><svg class="icon"><use href="#pin"/></svg>Mobile service · Perry, Florida</p></div><div><h3>Call or text</h3><a class="footer-phone" href="tel:+18508432598">850-843-2598</a><a class="footer-text" href="sms:+18508432598">Send a text message</a></div><div><h3>Detailing hours</h3><dl class="hours"><dt>Mon–Fri</dt><dd>5:30 pm – 11 pm</dd><dt>Sat–Sun</dt><dd>10 am – 11 pm</dd></dl></div></div></footer>
 <script>"use strict";
 
-const businessPhone = "+18508432598";
 const firstStep = document.getElementById("condition-step");
 const detailsStep = document.getElementById("details-step");
 const form = document.getElementById("estimate-form");
@@ -257,14 +261,22 @@ function clearFeedback() {
   preview.hidden = true;
 }
 
+function fieldValue(id) {
+  return document.getElementById(id).value.trim();
+}
+
+function serviceAddress() {
+  return [fieldValue("street"), fieldValue("unit"), fieldValue("city"), fieldValue("state").toUpperCase() + " " + fieldValue("zip")].filter(Boolean).join(", ");
+}
+
 function requestText() {
-  const value = id => document.getElementById(id).value.trim();
+  const value = fieldValue;
   const lines = [
     "Hi Killer Detailing! I’d like an estimate.",
     "Customer name: " + value("customer-name"),
-    "Vehicle: " + value("vehicle"),
+    "Vehicle: " + [value("year"), value("make"), value("model"), value("vehicle-type")].join(" "),
     "Condition: " + condition,
-    "Service address: " + [value("street"), value("unit"), value("city"), value("state").toUpperCase() + " " + value("zip")].filter(Boolean).join(", "),
+    "Service address: " + serviceAddress(),
     "Requested appointment: " + (flexible.checked ? "Arrange by text" : appointmentLabel.format(new Date(timeField.value)) + " Eastern"),
     "Package: " + value("service")
   ];
@@ -273,7 +285,7 @@ function requestText() {
 }
 
 function validateRequest() {
-  for (const id of ["customer-name", "vehicle", "street", "city", "state", "zip"]) {
+  for (const id of ["customer-name", "email", "phone", "year", "make", "model", "vehicle-type", "street", "city", "state", "zip"]) {
     const input = document.getElementById(id);
     input.setCustomValidity(input.value.trim() ? "" : "Please fill in this field.");
   }
@@ -297,14 +309,29 @@ form.addEventListener("input", event => {
   clearFeedback();
 });
 
-form.addEventListener("submit", event => {
+form.addEventListener("submit", async event => {
   event.preventDefault();
-  if (!validateRequest()) return;
-  const isAppleMobile = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  const separator = isAppleMobile ? "&" : "?";
-  statusMessage.textContent = "Finish sending in your texting app. If it didn’t open, use the copy option above.";
-  window.location.href = "sms:" + businessPhone + separator + "body=" + encodeURIComponent(requestText());
+  const submitButton = form.querySelector('[type="submit"]');
+  if (submitButton.disabled || !validateRequest()) return;
+  const data = new FormData();
+  const fields = { name: "customer-name", email: "email", phone: "phone", year: "year", make: "make", model: "model", vehicleType: "vehicle-type", website: "website" };
+  for (const [field, id] of Object.entries(fields)) data.set(field, fieldValue(id));
+  data.set("services", fieldValue("service").split(" – ")[0]);
+  data.set("serviceAddress", serviceAddress());
+  if (!flexible.checked) data.set("preferredDate", dayField.value);
+  data.set("condition", requestText());
+  submitButton.disabled = true;
+  statusMessage.textContent = "Sending your estimate request…";
+  try {
+    const response = await fetch("/api/requests", { method: "POST", body: data, credentials: "same-origin" });
+    const result = await response.json();
+    if (!response.ok || !result.ok) throw new Error(result.error || "Please try again.");
+    statusMessage.textContent = "Estimate request received. We’ll contact you after reviewing it.";
+    form.addEventListener("input", () => { submitButton.disabled = false; }, { once: true });
+  } catch {
+    submitButton.disabled = false;
+    statusMessage.textContent = "We couldn’t confirm your request. Try again or use the copy option to text us.";
+  }
 });
 
 document.getElementById("copy-request").addEventListener("click", async () => {
