@@ -86,7 +86,7 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
             <div class="form-grid">
               <label>Customer name<input id="customer-name" autocomplete="name" required maxlength="140"></label>
               <label>Email<input id="email" type="email" required maxlength="254" autocomplete="email"></label>
-              <label>Phone<input id="phone" type="tel" required maxlength="40" autocomplete="tel"></label>
+              <label>Phone<input id="customer-phone" type="tel" required maxlength="40" autocomplete="tel"></label>
               <label>Vehicle year<input id="year" required pattern="[0-9]{4}" maxlength="4" inputmode="numeric"></label>
               <label>Make<input id="make" required maxlength="80"></label>
               <label>Model<input id="model" required maxlength="80"></label>
@@ -144,7 +144,7 @@ h2{font:800 clamp(2rem,3vw,3.1rem)/1.1 var(--display);letter-spacing:-.035em}.es
       </div>
     </section>
     <section class="process" id="process" aria-labelledby="process-title"><div class="wrap"><div class="eyebrow"><i></i>How it works</div><h2 id="process-title">From estimate to appointment.</h2><div class="process-grid">
-      <article><svg class="icon"><use href="#message"/></svg><h3>Text your request</h3><p>Add your vehicle and service address, pick a time, and send your estimate request.</p></article>
+      <article><svg class="icon"><use href="#message"/></svg><h3>Send your request</h3><p>Add your vehicle and service address, pick a time, and send your estimate request.</p></article>
       <article><svg class="icon"><use href="#check"/></svg><h3>Approve your estimate</h3><p>We’ll text you the scope and price so you can decide if you’d like to book.</p></article>
       <article><svg class="icon"><use href="#clock"/></svg><h3>Confirm your appointment</h3><p>Once you approve the estimate, we’ll text you to confirm your appointment.</p></article>
     </div></div></section>
@@ -285,7 +285,7 @@ function requestText() {
 }
 
 function validateRequest() {
-  for (const id of ["customer-name", "email", "phone", "year", "make", "model", "vehicle-type", "street", "city", "state", "zip"]) {
+  for (const id of ["customer-name", "email", "customer-phone", "year", "make", "model", "vehicle-type", "street", "city", "state", "zip"]) {
     const input = document.getElementById(id);
     input.setCustomValidity(input.value.trim() ? "" : "Please fill in this field.");
   }
@@ -314,7 +314,7 @@ form.addEventListener("submit", async event => {
   const submitButton = form.querySelector('[type="submit"]');
   if (submitButton.disabled || !validateRequest()) return;
   const data = new FormData();
-  const fields = { name: "customer-name", email: "email", phone: "phone", year: "year", make: "make", model: "model", vehicleType: "vehicle-type", website: "website" };
+  const fields = { name: "customer-name", email: "email", phone: "customer-phone", year: "year", make: "make", model: "model", vehicleType: "vehicle-type", website: "website" };
   for (const [field, id] of Object.entries(fields)) data.set(field, fieldValue(id));
   data.set("services", fieldValue("service").split(" – ")[0]);
   data.set("serviceAddress", serviceAddress());
